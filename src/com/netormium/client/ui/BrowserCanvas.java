@@ -1201,7 +1201,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         } else if (y >= top && y < bottom && sessionId.length() > 0) {
             tapPage(x, y - top);
         } else if (y >= getHeight() - layout.getToolbarHeight()) {
-            if (x >= getWidth() / 2) showMainMenu();
+            if (x < getWidth() / 2) showMainMenu();
             else showAddressBox();
         } else if (y < top) {
             showAddressBox();
