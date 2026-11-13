@@ -158,8 +158,16 @@ const checks = [
     read('src/com/netormium/client/net/GatewayPageLoader.java').includes('if (declaredLength > MAX_RESPONSE_BYTES)') &&
     read('src/com/netormium/client/net/GatewayPageLoader.java').includes('if (total > MAX_RESPONSE_BYTES)') &&
     read('src/com/netormium/client/net/GatewayPageLoader.java').includes('new ByteArrayOutputStream(4096)')],
-  ['Main menu exposes About Netormium as a direct classic menu item',
-    canvas.includes('chooser.append("About Netormium", null)') &&
+  ['Main menu uses a custom compact canvas menu with keypad navigation',
+    canvas.includes('private boolean mainMenuOpen = false;') &&
+    canvas.includes('private void paintMainMenu(Graphics g') &&
+    canvas.includes('g.fillRect(x + 1, top + 1, panelWidth - 2, headerHeight)') &&
+    canvas.includes('if (mainMenuOpen)') &&
+    canvas.includes('mainMenuSelection++;') &&
+    canvas.includes('handleMainMenuSelection(selected);')],
+  ['Canvas main menu exposes About and Exit actions',
+    canvas.includes('items[15] = "About Netormium"') &&
+    canvas.includes('items[16] = "Exit"') &&
     canvas.includes('else if (selected == 15) showAbout();') &&
     canvas.includes('else if (selected == 16) midlet.exit();')],
   ['About displays the Netormium browser version and asynchronously fetched Chromium version',
