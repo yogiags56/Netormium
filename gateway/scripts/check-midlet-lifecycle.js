@@ -84,6 +84,14 @@ const checks = [
     read('src/com/netormium/client/util/SpeedDialStore.java').includes('int target = index + offset;') &&
     canvas.includes('moveSpeedDialUpCommand') && canvas.includes('moveSpeedDialDownCommand') &&
     canvas.includes('speedDial.move(speedDialUrls[selected], direction)')],
+  ['history manager supports deleting a single entry and persists the result',
+    read('src/com/netormium/client/util/BrowserHistory.java').includes('public boolean removeAt(int position)') &&
+    canvas.includes('deleteHistoryEntryCommand') &&
+    canvas.includes('history.removeAt(historyIndex)') &&
+    canvas.includes('historyStore.save(history);') &&
+    canvas.includes('chooser.addCommand(deleteHistoryEntryCommand)')],
+  ['history removal keeps the current index within valid bounds',
+    read('src/com/netormium/client/util/BrowserHistory.java').includes('else if (position == index && index >= size) index = size - 1;')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&
