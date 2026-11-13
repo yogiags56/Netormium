@@ -58,7 +58,7 @@ function ipv6IsPublic(address) {
   if ((w[0] & 0xe000) !== 0x2000) return false;
   if (w[0] === 0x2001 && w[1] === 0x0db8) return false; // documentation
   if (w[0] === 0x2001 && w[1] === 0x0002) return false; // benchmarking
-  if (w[0] === 0x2001 && (w[1] & 0xfff0) === 0x0010) return false; // ORCHID
+  if (w[0] === 0x2001 && ((w[1] & 0xfff0) === 0x0010 || (w[1] & 0xfff0) === 0x0020)) return false; // ORCHID v1/v2
   if (w[0] === 0x2002) return false; // 6to4 transition
   return true;
 }
