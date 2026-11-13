@@ -1,4 +1,5 @@
 name: Netormium Java ME Toolchain Probe
+# Triggered only on isolated Alpha branches.
 
 on:
   push:
