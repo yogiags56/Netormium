@@ -1,0 +1,30 @@
+Netormium 1.0.0-rc15 — RC15 validation
+
+Implemented:
+- ECJ Ant backend now receives every .java source file explicitly and sets sourcepath.
+- Individual source arguments are quoted to support project paths containing spaces.
+- Preverification output is deleted before each fresh preverify pass.
+- Added JAR/JAD structural validator and Ant verify-package / release targets.
+- Package validator checks MIDlet entry class, required manifest/JAD attributes,
+  MIDlet-1 consistency, MIDP 2.0 / CLDC 1.1 declarations, metadata consistency,
+  exact JAR byte size, and excludes bundled javax.microedition platform API classes.
+- Gateway and Java ME client identities updated to RC15.
+
+Validation results:
+- JavaScript syntax: PASS.
+- Unit tests: 31/31 PASS.
+- Release consistency: 7/7 PASS.
+- Ant help: PASS.
+- Ant project help: PASS.
+- Package validator tests: PASS using synthetic test JAR/JAD fixtures.
+- SDK discovery: NOT FOUND; only /usr/share/java was available and no
+  CLDC/MIDP/preverify components were found.
+- Genuine ECJ binary acquisition: NOT completed in this runtime.
+- Actual Java ME compilation, preverification, Netormium JAR/JAD packaging,
+  emulator execution, and physical handset tests: BLOCKED / NOT RUN.
+
+Important:
+The synthetic fixture JAR is only a validator test input. It is not a
+Netormium MIDlet binary and must not be installed on a phone.
+
+Release status: build pipeline integration RC15; NOT an installable MIDlet release.

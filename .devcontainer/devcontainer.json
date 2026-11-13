@@ -1,0 +1,14 @@
+{
+  "name": "Netormium Java ME development",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" },
+    "ghcr.io/devcontainers/features/java:1": { "version": "21", "installMaven": false, "installGradle": false }
+  },
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y ant unzip zip && cd gateway && npm install --ignore-scripts",
+  "customizations": {
+    "vscode": {
+      "extensions": ["vscjava.vscode-java-pack", "redhat.java"]
+    }
+  }
+}

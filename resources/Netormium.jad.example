@@ -1,0 +1,10 @@
+MIDlet-1: Netormium,,com.netormium.client.NetormiumMIDlet
+MIDlet-Name: Netormium
+MIDlet-Version: 1.0.0
+MIDlet-Vendor: Netormium Project
+MIDlet-Description: Chromium-assisted J2ME web browser
+MIDlet-Jar-URL: Netormium.jar
+MIDlet-Jar-Size: 0
+MicroEdition-Profile: MIDP-2.0
+MicroEdition-Configuration: CLDC-1.1
+Netormium-Gateway-URL: http://192.168.1.10:8787

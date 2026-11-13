@@ -1,0 +1,26 @@
+Netormium 1.0.0-rc10 validation report
+
+Implemented:
+- Added optional ECJ backend to the Ant compile pipeline.
+- ECJ backend invokes `org.eclipse.jdt.core.compiler.batch.BatchCompiler` in `-1.3` mode, using the configured CLDC/MIDP bootclasspath and output directory.
+- javac remains the default backend for environments with a compatible legacy JDK.
+- Toolchain preflight checks the selected backend; ECJ mode validates the ECJ archive and probes the batch compiler for `-1.3` mode.
+- Updated Gateway and Java ME client runtime identity to RC10.
+
+Automated validation:
+- Pending final run.
+
+Environment findings:
+- OpenJDK 21 and Apache Ant 1.10.15 are available.
+- No CLDC API JAR, MIDP API JAR, Java ME preverifier, or ECJ JAR is installed/configured.
+- The default javac 21 backend cannot meet Java 1.3 source / Java 1.1 target settings.
+- ECJ backend is implemented but cannot be executed until a compatible ECJ JAR is supplied.
+
+Not performed:
+- Real MIDP/CLDC compilation.
+- Java ME bytecode preverification.
+- JAR/JAD packaging.
+- Playwright/Chromium live integration.
+- Emulator or physical handset tests.
+
+No installable JAR/JAD is claimed or included.

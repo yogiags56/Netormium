@@ -1,0 +1,48 @@
+Netormium 1.0.0-rc18 — RC18 validation
+
+Release objective:
+- Stop repeating automatic ECJ download attempts as the primary workflow.
+- Configure a locally installed Java ME SDK/WTK and locally supplied ECJ only
+  after validating the actual toolchain inputs.
+
+Implemented:
+- Added gateway/scripts/configure-local-toolchain.js.
+- The helper locates CLDC/MIDP API archives and the host-specific preverifier
+  under an explicit SDK root.
+- It inspects required API class entries using the JDK jar tool.
+- It verifies the supplied ECJ artifact using the pinned SHA-512 and batch
+  compiler legacy -1.3 launch probe.
+- It writes build.properties only after every required component passes.
+- It refuses incomplete SDKs, non-executable preverifiers, invalid API archives,
+  and missing/unverified ECJ; no partial properties file is left behind.
+- Added four tests covering CLI parsing, successful configuration, rejection
+  of invalid SDK inventories, and refusal to silently fall back to javac.
+- Updated Gateway and all three Java ME User-Agent identities to RC18.
+- Updated README, changelog, and toolchain acquisition documentation.
+
+Automated validation:
+- JavaScript syntax check: PASS.
+- Unit tests: 35/35 PASS.
+- Release consistency: 7/7 PASS.
+- configure-local-toolchain --help: PASS.
+- Ant help / project-help: PASS.
+- ZIP integrity: pending package creation.
+
+Environment/toolchain status:
+- OpenJDK 21.0.12.1: available.
+- javac 21.0.12.1: available; does not advertise source 1.3 / target 1.1.
+- Apache Ant 1.10.15: available.
+- SDK discovery: NOT FOUND; only /usr/share/java was searched and no CLDC,
+  MIDP or preverifier components were identified.
+- ant doctor: 3/8 checks passed; CLDC, MIDP, preverifier and legacy javac
+  compatibility checks are missing.
+- Oracle download host test: DNS resolution failed in this runtime.
+- No ECJ JAR, Java ME API archives, or preverifier were acquired.
+- Genuine compile, preverify, JAR/JAD packaging, emulator test, and physical
+  handset test: NOT RUN.
+
+Release status:
+RC18 improves the path for using a developer-installed SDK, but is not an
+installable MIDlet release. It does not claim that a real MIDlet was built.
+The next required input is a locally installed WTK/Java ME SDK plus a verified
+ECJ JAR, or access to a host environment where these can be obtained.

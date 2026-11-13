@@ -1,0 +1,37 @@
+Netormium 1.0.0-rc17 — RC17 validation
+
+Implemented:
+- Added official Eclipse archive.eclipse.org as a fallback mirror for the pinned
+  ECJ 4.41 GA batch compiler artifact.
+- Both official mirror URLs are tied to the same published SHA-512 digest.
+- Each acquired artifact must still pass ZIP/JAR signature, SHA-512, compiler
+  launch, and legacy -1.3 mode checks before installation.
+- Improved per-mirror acquisition failure reporting.
+- Updated Gateway banner/health identity and all Java ME User-Agent strings to
+  RC17; release consistency checks updated accordingly.
+- Documented the fallback behavior and retained strict SDK build gates.
+
+Automated validation:
+- JavaScript syntax check for ECJ acquisition script: PASS.
+- Unit tests: 31/31 PASS.
+- Release consistency: 7/7 PASS.
+- Ant project help: PASS.
+- Source inventory: 18 Java files.
+
+Actual toolchain/build status:
+- Java runtime: OpenJDK 21.0.12.1 — PASS.
+- javac: 21.0.12.1 — available, but does not support source 1.3 / target 1.1.
+- Apache Ant: 1.10.15 — PASS.
+- ECJ primary host: BLOCKED; DNS resolution returned EAI_AGAIN.
+- ECJ official archive fallback: BLOCKED; download timed out after 25 seconds.
+- ECJ SHA-512 and runtime probe: NOT RUN; no artifact downloaded.
+- Java ME SDK discovery: NOT FOUND; CLDC API, MIDP API, and preverifier absent.
+- ant doctor: BLOCKED, 3/8 checks passed.
+- ant compile: BLOCKED because MIDP_API_JAR / midp.api.jar is not configured.
+- Real Java ME compilation, preverification, JAR/JAD packaging, emulator run,
+  and physical handset tests: NOT RUN.
+
+Release status:
+RC17 is a source/build-pipeline update, NOT an installable MIDlet. No fake
+JAR/JAD was generated. A genuine Java ME SDK and a verified ECJ artifact are
+still required before the first actual MIDlet build.

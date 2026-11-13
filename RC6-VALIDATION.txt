@@ -1,0 +1,90 @@
+Netormium 1.0.0-rc6 validation report
+
+Node.js syntax checks:
+- server.js: PASS
+- metadata-limits.js: PASS
+- viewport-limits.js: PASS
+- response-validation.js: PASS
+- pending-navigation-registry.js: PASS
+
+Automated Node.js test suite:
+TAP version 13
+# Subtest: metadata string bounds are enforced
+ok 1 - metadata string bounds are enforced
+  ---
+  duration_ms: 1.311362
+  type: 'test'
+  ...
+# Subtest: metadata limits fit the compact feature-phone protocol budget
+ok 2 - metadata limits fit the compact feature-phone protocol budget
+  ---
+  duration_ms: 0.332383
+  type: 'test'
+  ...
+# Subtest: registers and cancels a pending navigation exactly once
+ok 3 - registers and cancels a pending navigation exactly once
+  ---
+  duration_ms: 1.063207
+  type: 'test'
+  ...
+# Subtest: finishing a navigation removes its cancellation handler
+ok 4 - finishing a navigation removes its cancellation handler
+  ---
+  duration_ms: 0.189657
+  type: 'test'
+  ...
+# Subtest: unknown and empty identifiers are harmless
+ok 5 - unknown and empty identifiers are harmless
+  ---
+  duration_ms: 0.216227
+  type: 'test'
+  ...
+# Subtest: accepts PNG signature, IHDR and bounded viewport dimensions
+ok 6 - accepts PNG signature, IHDR and bounded viewport dimensions
+  ---
+  duration_ms: 1.525706
+  type: 'test'
+  ...
+# Subtest: rejects truncated, non-PNG and oversized dimensions
+ok 7 - rejects truncated, non-PNG and oversized dimensions
+  ---
+  duration_ms: 0.659507
+  type: 'test'
+  ...
+# Subtest: uses defaults for missing or malformed viewport dimensions
+ok 8 - uses defaults for missing or malformed viewport dimensions
+  ---
+  duration_ms: 1.646578
+  type: 'test'
+  ...
+# Subtest: clamps viewport dimensions to safe feature-phone bounds
+ok 9 - clamps viewport dimensions to safe feature-phone bounds
+  ---
+  duration_ms: 0.202325
+  type: 'test'
+  ...
+# Subtest: floors fractional viewport dimensions and stays within pixel budget
+ok 10 - floors fractional viewport dimensions and stays within pixel budget
+  ---
+  duration_ms: 0.221104
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 138.891035
+
+Java source compatibility audit:
+- No generics, enhanced-for loops, StringBuilder, java.nio, java.util.concurrent, or try-with-resources constructs found.
+- All 18 Java source files passed lexical brace/string/comment balance checks.
+- javac source-level parse/compile attempt is blocked by missing Java ME packages (javax.microedition.midlet, lcdui, rms and io). The JDK itself is present, but MIDP/CLDC SDK libraries are not.
+- Full MIDP/CLDC compilation: NOT VERIFIED.
+
+Runtime:
+- Playwright/Chromium live integration: NOT RUN.
+- Emulator and physical feature-phone tests: NOT RUN.

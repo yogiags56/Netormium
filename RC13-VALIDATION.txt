@@ -1,0 +1,37 @@
+Netormium 1.0.0-rc13 — RC13 validation
+
+Implemented:
+- Pinned standalone Eclipse JDT batch compiler to stable Eclipse 4.41 GA:
+  R-4.41-202608281142 / ecj-4.41.jar.
+- Pinned SHA-512 from the official Eclipse 4.41 release page.
+- Acquisition script verifies HTTPS download, bounded redirects, size limit,
+  JAR signature, SHA-512, JVM launch, and legacy `-1.3` option before install.
+- Java ME doctor inspects CLDC/MIDP JAR contents, including required classes.
+- Updated client User-Agent and Gateway release banners to RC13.
+- Added unit coverage for stable ECJ identity and API inventory logic.
+
+Official verification sources:
+- Eclipse 4.41 release artifact/checksum page:
+  https://archive.eclipse.org/eclipse/downloads/drops4/R-4.41-202608281142/index.html
+- Oracle WTK 2.5.2 command-line build guide:
+  https://docs.oracle.com/javame/dev-tools/wtk-cldc-2.5.2-01/UserGuide-html/commandline.html
+- Oracle Java ME SDK / WTK downloads:
+  https://www.oracle.com/java/technologies/java-archive-downloads-javame-downloads.html
+
+Validation completed:
+- JavaScript syntax checks: PASS.
+- `npm test`: 23/23 PASS.
+- `npm run check:release`: 7/7 PASS.
+- `ant help` and `ant -projecthelp`: PASS.
+- `node gateway/scripts/acquire-ecj.js --help`: PASS.
+- ZIP archive integrity check: PASS.
+- `doctor` correctly reports NOT READY (3/8 checks) using placeholder paths.
+
+Environment limitations:
+- ECJ binary download was attempted from both download.eclipse.org and
+  archive.eclipse.org, but the runtime downloader could not retrieve it.
+- No genuine CLDC API JAR, MIDP API JAR, or Java ME preverifier is installed.
+- A real Java ME compile, preverifier execution, JAR/JAD generation, emulator
+  launch, and handset test therefore remain BLOCKED / NOT RUN.
+
+Release status: build-integration RC13; NOT an installable MIDlet release.

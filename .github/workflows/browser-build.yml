@@ -1,0 +1,109 @@
+name: Netormium Browser Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_java_me_release:
+        description: "Run genuine Java ME release gate (requires SDK + ECJ configured on runner)"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  source-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Ant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant
+
+      - name: Gateway tests
+        working-directory: gateway
+        run: npm test
+
+      - name: Release consistency
+        working-directory: gateway
+        run: npm run check:release
+
+      - name: Ant build diagnostics
+        run: ant doctor
+
+      - name: Archive diagnostic output
+        if: always()
+        run: |
+          mkdir -p browser-build-report
+          java -version 2> browser-build-report/java-version.txt
+          node --version > browser-build-report/node-version.txt
+          ant -version > browser-build-report/ant-version.txt
+          ant doctor > browser-build-report/ant-doctor.txt 2>&1 || true
+
+      - name: Upload source validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netormium-browser-validation
+          path: browser-build-report/
+          if-no-files-found: warn
+
+  java-me-release:
+    if: ${{ inputs.run_java_me_release }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Ant
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant
+
+      - name: Require externally provisioned Java ME toolchain
+        env:
+          JAVA_ME_SDK_HOME: ${{ vars.JAVA_ME_SDK_HOME }}
+          ECJ_JAR: ${{ vars.ECJ_JAR }}
+        run: |
+          test -n "$JAVA_ME_SDK_HOME" || { echo "JAVA_ME_SDK_HOME is not configured"; exit 2; }
+          test -n "$ECJ_JAR" || { echo "ECJ_JAR is not configured"; exit 2; }
+          test -d "$JAVA_ME_SDK_HOME" || { echo "SDK path is unavailable on hosted runner"; exit 2; }
+          test -f "$ECJ_JAR" || { echo "ECJ JAR is unavailable on hosted runner"; exit 2; }
+          echo "Paths are configured. SDK contents must still pass toolchain validation."
+
+      - name: Discover and validate Java ME SDK
+        run: |
+          node gateway/scripts/check-j2me-toolchain.js --help || true
+          ant doctor
+          ant -Dcompiler.backend=ecj -Decj.jar="$ECJ_JAR" -Djava.me.sdk="$JAVA_ME_SDK_HOME" release
+
+      - name: Upload MIDlet package
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netormium-midlet-jar-jad
+          path: |
+            dist/*.jar
+            dist/*.jad
+          if-no-files-found: error

@@ -1,0 +1,32 @@
+Netormium 1.0.0-rc11 validation report
+
+Implemented:
+- Corrected ECJ standalone batch compiler main class to `org.eclipse.jdt.compiler.batch.BatchCompiler`, as documented by Eclipse.
+- ECJ preflight probes the corrected entry point for a successful `-help` response containing the `-1.3` mode.
+- Ant ECJ target passes the source root directory directly, avoiding shell-like splitting of file paths containing spaces.
+- Added two focused unit tests for ECJ probe arguments and legacy-mode capability detection.
+- Updated Gateway and Java ME client identities to RC11.
+- Documented Oracle Sun Java Wireless Toolkit 2.5.2_01 as an archived toolchain option; official documentation lists CLDC 1.1 and MIDP 2.0 support.
+
+Automated validation:
+- Toolchain checker syntax: PASS.
+- Gateway unit tests: PASS (17/17).
+- Release consistency checks: PASS (7/7).
+- Ant help target: PASS.
+- Ant target discovery: PASS.
+- ZIP integrity: pending packaging check.
+
+Environment:
+- OpenJDK 21 and Apache Ant 1.10.15 are present.
+- No ECJ JAR, CLDC API JAR, MIDP API JAR, or Java ME preverifier is installed/configured.
+- Official ECJ download retrieval was attempted but did not complete in this environment.
+- `ant doctor` remains NOT READY because SDK dependencies are absent and javac 21 cannot satisfy the configured legacy source/target levels.
+
+Not performed:
+- Real MIDP/CLDC source compilation.
+- Java ME bytecode preverification.
+- JAR/JAD packaging.
+- Playwright/Chromium live integration.
+- Emulator or physical handset installation tests.
+
+No installable MIDlet binary is claimed or included.

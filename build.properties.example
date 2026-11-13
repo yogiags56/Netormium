@@ -1,0 +1,14 @@
+# Copy to build.properties or pass these properties on the Ant command line.
+# Paths depend on the installed Java ME SDK / Wireless Toolkit.
+# Run: ant doctor  (or npm run check:j2me-toolchain from gateway/)
+cldc.api.jar=/absolute/path/to/cldc-api.jar
+midp.api.jar=/absolute/path/to/midp-api.jar
+preverify.executable=/absolute/path/to/preverify
+javac.source=1.3
+javac.target=1.1
+
+# Optional: Eclipse Compiler for Java (ECJ) backend.
+# ECJ supports legacy Java 1.3 source and classfile target 1.1 modes.
+# Set compiler.backend=ecj and provide the ECJ JAR when using a modern JDK.
+compiler.backend=javac
+ecj.jar=/absolute/path/to/ecj.jar

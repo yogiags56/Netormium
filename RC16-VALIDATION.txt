@@ -1,0 +1,34 @@
+Netormium 1.0.0-rc16 — RC16 validation
+
+Implemented:
+- Updated Gateway package version, health banner, Java ME User-Agent strings,
+  and release consistency checks to RC16.
+- Updated README and toolchain acquisition documentation for the first genuine
+  MIDlet build attempt.
+- Kept strict compile/preverify/package/emulator/device gates; no synthetic
+  artifact is presented as an installable MIDlet.
+
+Automated validation:
+- JavaScript syntax checks (server and all scripts): PASS.
+- Unit tests: 31/31 PASS.
+- Release consistency: 7/7 PASS.
+- Ant help: PASS.
+- Ant project help: PASS.
+- ZIP integrity: verified after packaging.
+
+Actual toolchain/build status:
+- Java runtime: OpenJDK 21.0.12.1 — PASS.
+- Apache Ant: 1.10.15 — PASS.
+- ECJ 4.41 acquisition: BLOCKED; DNS resolution failed for download.eclipse.org.
+- Local SDK discovery: NOT FOUND; cldcapi11.jar, midpapi20.jar, and preverify
+  are absent from /usr/share/java.
+- ant doctor: BLOCKED, 3/8 checks passed. CLDC, MIDP, preverifier, and legacy
+  javac 1.3/1.1 compatibility are missing.
+- ant compile: BLOCKED because MIDP_API_JAR / midp.api.jar is not configured.
+- Real Java ME compilation, preverification, JAR/JAD generation, emulator
+  execution, and physical handset tests: NOT RUN.
+
+Release status:
+RC16 is a source/build-pipeline validation package, NOT an installable MIDlet.
+No fake JAR/JAD was generated. Genuine vendor SDK components must be installed
+and configured before the first actual MIDlet build can proceed.

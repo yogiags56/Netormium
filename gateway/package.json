@@ -1,0 +1,20 @@
+{
+  "name": "netormium-gateway",
+  "version": "1.0.0-rc19",
+  "private": true,
+  "description": "Data-saving Chromium session gateway for Netormium J2ME browser",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.js",
+    "check:release": "node scripts/check-release.js",
+    "check:j2me-toolchain": "node scripts/check-j2me-toolchain.js --property-file ../build.properties",
+    "acquire:ecj": "node scripts/acquire-ecj.js",
+    "discover:j2me-sdk": "node scripts/discover-j2me-sdk.js",
+    "check:midlet-package": "node scripts/check-midlet-package.js",
+    "configure:j2me-toolchain": "node scripts/configure-local-toolchain.js"
+  },
+  "dependencies": {
+    "playwright": "^1.56.1"
+  }
+}

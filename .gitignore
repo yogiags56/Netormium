@@ -1,0 +1,9 @@
+build/
+dist/
+gateway/node_modules/
+gateway/.env
+*.class
+*.jar
+build.properties
+# Local Java ME SDK/compiler payloads must not be committed.
+toolchain/local/

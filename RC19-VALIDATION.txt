@@ -1,0 +1,35 @@
+Netormium 1.0.0-rc19 — Android-first development workflow
+
+Objective:
+Make source development and repeatable validation possible from an Android phone,
+while using a browser-based cloud Linux environment for host-dependent toolchain work.
+
+Implemented:
+- Added Termux setup script for Git, Node.js LTS, OpenJDK 21, Ant, ZIP tools.
+- Added Termux doctor script that distinguishes base developer tools from the
+  separately required Java ME SDK components.
+- Added Termux test script for Node built-in unit tests and release identity checks.
+- Added GitHub Codespaces devcontainer configuration with Node 22 and Java 21.
+- Added GitHub Actions validation workflow for unit tests, release consistency and Ant.
+- Added Android-only workflow documentation, including private SDK handling and
+  limitations of running legacy native preverifier binaries on Android/Bionic.
+- Updated active Gateway and Java ME User-Agent identities to RC19.
+
+Validation performed in this build environment:
+- Node unit tests: 35/35 PASS.
+- Release identity checks: 7/7 PASS.
+- Ant project help: PASS.
+- Shell syntax checks: PASS.
+- JSON devcontainer syntax: PASS.
+- GitHub Actions YAML parse: PASS.
+- ZIP integrity: verified at package creation.
+
+Not performed:
+- Termux installation or execution on the user's Android device.
+- Codespace creation (requires user's GitHub account and explicit action).
+- Acquisition of ECJ / CLDC / MIDP / preverifier.
+- Genuine MIDlet compile, preverification, JAR/JAD creation, emulator or handset test.
+
+Important:
+RC19 is a mobile-first development workflow package, not an installable MIDlet.
+No toolchain components or synthetic API stubs are represented as genuine SDK assets.

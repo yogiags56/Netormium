@@ -1,0 +1,35 @@
+Netormium 1.0.0-rc8 validation report
+
+Implemented:
+- Added a Java ME toolchain preflight script.
+- Added `ant doctor` and `npm run check:j2me-toolchain`.
+- Updated Gateway health/banner and all Java ME client User-Agent identities to RC8.
+- Updated release documentation and build instructions.
+
+Environment checks:
+- Java runtime: PASS (OpenJDK 21).
+- javac: PASS (javac 21).
+- Apache Ant: PASS (Ant 1.10.15).
+- CLDC API JAR: MISSING.
+- MIDP API JAR: MISSING.
+- Java ME preverifier: MISSING.
+- Java 1.3 source compatibility: BLOCKED on javac 21.
+- `ant doctor`: correctly reports NOT READY and exits non-zero.
+
+Automated validation:
+- New toolchain checker JavaScript syntax: PASS.
+- Gateway unit tests: PASS (10/10).
+- Release consistency checks: PASS (7/7).
+- Preflight PASS branch: exercised with temporary placeholder files and a Java 8 source-level override solely to test checker wiring. This is NOT a Java ME SDK validation or MIDlet build.
+
+Not performed:
+- Real MIDP/CLDC compilation.
+- Java ME bytecode preverification.
+- JAR/JAD generation.
+- Playwright/Chromium live integration.
+- Emulator or physical feature-phone installation tests.
+
+Release status:
+- RC8 improves build diagnostics and release consistency.
+- No installable JAR/JAD is included or claimed.
+- Next blocker is obtaining a compatible Java ME SDK/WTK toolchain and performing a real compile + preverify + install test.

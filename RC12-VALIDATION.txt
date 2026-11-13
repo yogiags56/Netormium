@@ -1,0 +1,25 @@
+Netormium 1.0.0-rc12 — RC12 validation
+
+Scope: pinned ECJ acquisition and Java ME SDK provenance / release-gate preparation.
+
+Implemented:
+- acquire-ecj.js pins Eclipse ECJ Y20261108-1500.
+- SHA-512 is checked against Eclipse's published digest before finalizing the downloaded JAR.
+- Download uses HTTPS, bounded redirects, temporary-file staging, ZIP/JAR header validation, and refuses invalid pre-existing files.
+- SDK setup documentation identifies Oracle Java ME SDK 3.0, WTK 2.5.2_01, MIDP 2.0 references, and the required CLDC/MIDP/preverifier configuration.
+- No vendor SDK binary is bundled or redistributed.
+
+Environment acquisition attempt:
+- Direct ECJ download from download.eclipse.org failed in this execution environment.
+- No ECJ JAR, CLDC API JAR, MIDP API JAR, or Java ME preverifier was found in the available local paths.
+- Therefore a genuine Java ME compile, preverifier pass, JAR/JAD packaging, emulator test, and handset test remain BLOCKED / NOT RUN.
+
+Validation to run:
+- node --check gateway/scripts/acquire-ecj.js
+- npm test
+- npm run check:release
+- npm run check:j2me-toolchain (expected NOT READY until licensed SDK components are installed)
+- ant help
+- ant -projecthelp
+
+Release status: engineering-preparation RC12; NOT an installable MIDlet release.

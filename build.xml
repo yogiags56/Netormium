@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Netormium" default="help" basedir=".">
+    <property name="app.name" value="Netormium"/>
+    <property name="app.version" value="1.0.0"/>
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="preverified.dir" value="${build.dir}/preverified"/>
+    <property name="dist.dir" value="dist"/>
+    <property name="jad.template" value="resources/Netormium.jad.example"/>
+    <property environment="env"/>
+    <property name="midp.api.jar" value="${env.MIDP_API_JAR}"/>
+    <property name="cldc.api.jar" value="${env.CLDC_API_JAR}"/>
+    <property name="preverify.executable" value="${env.PREVERIFY}"/>
+    <property name="compiler.backend" value="javac"/>
+    <property name="ecj.jar" value=""/>
+    <property name="javac.source" value="1.3"/>
+    <property name="javac.target" value="1.1"/>
+    <condition property="use.ecj">
+        <equals arg1="${compiler.backend}" arg2="ecj"/>
+    </condition>
+
+    <path id="midp.bootclasspath">
+        <pathelement location="${cldc.api.jar}"/>
+        <pathelement location="${midp.api.jar}"/>
+    </path>
+
+    <target name="help">
+        <echo>Targets: doctor, clean, compile, preverify, package, verify-package, release. Configure CLDC_API_JAR, MIDP_API_JAR and PREVERIFY.</echo>
+        <echo>Optional ECJ backend: set compiler.backend=ecj and ecj.jar=/path/to/ecj.jar in build.properties.</echo>
+        <echo>Preflight: ant doctor (requires Node.js). Full build: ant -propertyfile build.properties clean release.</echo>
+    </target>
+
+    <target name="doctor">
+        <exec executable="node" failonerror="true">
+            <arg value="gateway/scripts/check-j2me-toolchain.js"/>
+            <arg value="--property-file"/>
+            <arg value="build.properties"/>
+        </exec>
+    </target>
+
+    <target name="check-config">
+        <available file="${midp.api.jar}" property="midp.api.exists"/>
+        <available file="${cldc.api.jar}" property="cldc.api.exists"/>
+        <available file="${preverify.executable}" property="preverify.exists"/>
+        <fail unless="midp.api.exists" message="MIDP_API_JAR / midp.api.jar must point to the MIDP API jar."/>
+        <fail unless="cldc.api.exists" message="CLDC_API_JAR / cldc.api.jar must point to the CLDC API jar."/>
+        <fail unless="preverify.exists" message="PREVERIFY / preverify.executable must point to the Java ME preverifier."/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <target name="compile" depends="check-config,compile-javac,compile-ecj"/>
+
+    <target name="compile-javac" unless="use.ecj">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}"
+               source="${javac.source}" target="${javac.target}"
+               includeantruntime="false" encoding="UTF-8" debug="false">
+            <bootclasspath refid="midp.bootclasspath"/>
+        </javac>
+    </target>
+
+    <target name="compile-ecj" if="use.ecj">
+        <mkdir dir="${classes.dir}"/>
+        <available file="${ecj.jar}" type="file" property="ecj.jar.exists"/>
+        <fail unless="ecj.jar.exists" message="compiler.backend=ecj requires ecj.jar to point to an Eclipse Compiler JAR."/>
+        <java classname="org.eclipse.jdt.compiler.batch.BatchCompiler"
+              fork="true" failonerror="true">
+            <classpath><pathelement location="${ecj.jar}"/></classpath>
+            <arg value="-1.3"/>
+            <arg value="-encoding"/>
+            <arg value="UTF-8"/>
+            <arg value="-bootclasspath"/>
+            <arg pathref="midp.bootclasspath"/>
+            <arg value="-d"/>
+            <arg path="${classes.dir}"/>
+            <arg value="-sourcepath"/>
+            <arg path="${src.dir}"/>
+            <pathconvert property="ecj.source.files" pathsep=" ">
+                <fileset dir="${src.dir}" includes="**/*.java"/>
+                <mapper type="glob" from="*" to="&quot;*&quot;"/>
+            </pathconvert>
+            <arg line="${ecj.source.files}"/>
+        </java>
+    </target>
+
+    <target name="preverify" depends="compile">
+        <delete dir="${preverified.dir}"/>
+        <mkdir dir="${preverified.dir}"/>
+        <exec executable="${preverify.executable}" failonerror="true">
+            <arg value="-classpath"/>
+            <arg pathref="midp.bootclasspath"/>
+            <arg value="-d"/>
+            <arg path="${preverified.dir}"/>
+            <arg path="${classes.dir}"/>
+        </exec>
+    </target>
+
+    <target name="package" depends="preverify">
+        <mkdir dir="${dist.dir}"/>
+        <jar destfile="${dist.dir}/${app.name}.jar" basedir="${preverified.dir}">
+            <manifest>
+                <attribute name="MIDlet-Name" value="${app.name}"/>
+                <attribute name="MIDlet-Version" value="${app.version}"/>
+                <attribute name="MIDlet-Vendor" value="Netormium Project"/>
+                <attribute name="MicroEdition-Profile" value="MIDP-2.0"/>
+                <attribute name="MicroEdition-Configuration" value="CLDC-1.1"/>
+                <attribute name="MIDlet-1" value="Netormium,,com.netormium.client.NetormiumMIDlet"/>
+            </manifest>
+        </jar>
+        <copy file="${jad.template}" tofile="${dist.dir}/${app.name}.jad"/>
+        <length file="${dist.dir}/${app.name}.jar" property="jar.size"/>
+        <replaceregexp file="${dist.dir}/${app.name}.jad"
+                       match="MIDlet-Jar-Size: [0-9]+"
+                       replace="MIDlet-Jar-Size: ${jar.size}"/>
+        <replaceregexp file="${dist.dir}/${app.name}.jad"
+                       match="MIDlet-Jar-URL: .*"
+                       replace="MIDlet-Jar-URL: ${app.name}.jar"/>
+        <echo>Created ${dist.dir}/${app.name}.jar and ${dist.dir}/${app.name}.jad</echo>
+    </target>
+
+    <target name="verify-package" depends="package">
+        <exec executable="node" failonerror="true">
+            <arg value="gateway/scripts/check-midlet-package.js"/>
+            <arg value="${dist.dir}/${app.name}.jar"/>
+            <arg value="${dist.dir}/${app.name}.jad"/>
+        </exec>
+    </target>
+
+    <target name="release" depends="verify-package">
+        <echo>Netormium MIDlet package passed structural validation.</echo>
+    </target>
+</project>

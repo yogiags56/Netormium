@@ -1,0 +1,69 @@
+Netormium 1.0.0-rc5 validation report
+
+Node.js syntax checks:
+- server.js: PASS
+- metadata-limits.js: PASS
+- response-validation.js: PASS
+- pending-navigation-registry.js: PASS
+
+Automated Node.js tests:
+TAP version 13
+# Subtest: metadata string bounds are enforced
+ok 1 - metadata string bounds are enforced
+  ---
+  duration_ms: 0.943607
+  type: 'test'
+  ...
+# Subtest: metadata limits fit the compact feature-phone protocol budget
+ok 2 - metadata limits fit the compact feature-phone protocol budget
+  ---
+  duration_ms: 0.293954
+  type: 'test'
+  ...
+# Subtest: registers and cancels a pending navigation exactly once
+ok 3 - registers and cancels a pending navigation exactly once
+  ---
+  duration_ms: 0.728431
+  type: 'test'
+  ...
+# Subtest: finishing a navigation removes its cancellation handler
+ok 4 - finishing a navigation removes its cancellation handler
+  ---
+  duration_ms: 0.130747
+  type: 'test'
+  ...
+# Subtest: unknown and empty identifiers are harmless
+ok 5 - unknown and empty identifiers are harmless
+  ---
+  duration_ms: 0.143387
+  type: 'test'
+  ...
+# Subtest: accepts a PNG signature with an IHDR chunk
+ok 6 - accepts a PNG signature with an IHDR chunk
+  ---
+  duration_ms: 1.026041
+  type: 'test'
+  ...
+# Subtest: rejects truncated or non-PNG data
+ok 7 - rejects truncated or non-PNG data
+  ---
+  duration_ms: 0.138198
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 76.991831
+
+Java ME client:
+- BrowserCanvas.java structural brace check: PASS.
+- Full MIDP/CLDC compilation: NOT RUN; MIDP/CLDC SDK libraries are unavailable in this environment.
+
+Runtime integration:
+- Playwright/Chromium live integration: NOT RUN.
+- Emulator and physical feature-phone tests: NOT RUN.
