@@ -11,7 +11,7 @@ test('ECJ acquisition is pinned to the stable Eclipse 4.41 GA artifact', () => {
   assert.equal(RELEASE, '4.41');
   assert.equal(BUILD, 'R-4.41-202608281142');
   assert.equal(FILE, 'ecj-4.41.jar');
-  assert.equal(MAIN_CLASS, 'org.eclipse.jdt.compiler.batch.BatchCompiler');
+  assert.equal(MAIN_CLASS, 'org.eclipse.jdt.internal.compiler.batch.Main');
   assert.match(URL, /^https:\/\/download\.eclipse\.org\/eclipse\/downloads\/drops4\/R-4\.41-/);
   assert.equal(URLS.length, 2);
   assert.match(URLS[1], /^https:\/\/archive\.eclipse\.org\/eclipse\/downloads\/drops4\/R-4\.41-/);
