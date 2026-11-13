@@ -3,6 +3,7 @@ MIDlet-Name: Netormium
 MIDlet-Version: 1.0.0-rc21
 MIDlet-Vendor: Netormium Project
 MIDlet-Description: Chromium-assisted J2ME web browser
+MIDlet-Permissions: javax.microedition.io.Connector.http, javax.microedition.io.Connector.https
 MIDlet-Jar-URL: Netormium.jar
 MIDlet-Jar-Size: 0
 MicroEdition-Profile: MIDP-2.0
