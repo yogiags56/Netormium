@@ -865,7 +865,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         g.setColor(ThemeManager.HEADER_FOREGROUND);
         g.drawString("Open", 3, footerY + footerH / 2,
             Graphics.LEFT | Graphics.VCENTER);
-        g.drawString(loading ? "Stop" : "Links " + pageLinks.length, w - 3, footerY + footerH / 2,
+        g.drawString("Menu", w - 3, footerY + footerH / 2,
             Graphics.RIGHT | Graphics.VCENTER);
 
         g.setColor(ThemeManager.MUTED);
@@ -948,13 +948,42 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         }
     }
 
+    private int speedDialIndexAt(int x, int y, int top, int bottom) {
+        ScreenMetrics metrics = new ScreenMetrics(getWidth(), getHeight());
+        Font body = ThemeManager.getBodyFont(metrics);
+        Font title = ThemeManager.getTitleFont();
+        int logoSize = Math.min(42, Math.max(30, getWidth() / 6));
+        int sectionY = top + 8 + logoSize + title.getHeight() + body.getHeight() + 15;
+        sectionY += body.getHeight() + 5;
+        int columns = getWidth() >= 220 ? 2 : 1;
+        int gap = 5;
+        int tileWidth = (getWidth() - 10 - ((columns - 1) * gap)) / columns;
+        int tileHeight = Math.max(30, body.getHeight() + 13);
+        if (y < sectionY) return -1;
+        int row = (y - sectionY) / (tileHeight + gap);
+        int column = (x - 5) / (tileWidth + gap);
+        if (column < 0 || column >= columns || row < 0) return -1;
+        int tileX = 5 + column * (tileWidth + gap);
+        int tileY = sectionY + row * (tileHeight + gap);
+        if (x < tileX || x >= tileX + tileWidth ||
+            y < tileY || y >= tileY + tileHeight || tileY + tileHeight > bottom) return -1;
+        return row * columns + column;
+    }
+
     protected void pointerPressed(int x, int y) {
         ScreenMetrics metrics = new ScreenMetrics(getWidth(), getHeight());
         AdaptiveLayout layout = new AdaptiveLayout(metrics);
         int top = layout.getAddressBarHeight() + 3;
         int bottom = getHeight() - layout.getToolbarHeight() - 2;
-        if (y >= top && y < bottom && sessionId.length() > 0) {
+        if (y >= top && y < bottom && currentUrl.length() == 0) {
+            int dial = speedDialIndexAt(x, y, top, bottom);
+            BookmarkStore.Bookmark[] items = bookmarks.all();
+            if (dial >= 0 && dial < items.length) loadUrl(items[dial].url, true);
+        } else if (y >= top && y < bottom && sessionId.length() > 0) {
             tapPage(x, y - top);
+        } else if (y >= getHeight() - layout.getToolbarHeight()) {
+            if (x >= getWidth() / 2) showMainMenu();
+            else showAddressBox();
         } else if (y < top) {
             showAddressBox();
         }
