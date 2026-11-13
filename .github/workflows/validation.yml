@@ -18,14 +18,41 @@ jobs:
           java-version: '21'
       - name: Install Ant
         run: sudo apt-get update && sudo apt-get install -y ant
+      - name: Prepare diagnostic directory
+        run: mkdir -p validation-report
       - name: Run gateway unit tests
         working-directory: gateway
-        run: node --test test/*.test.js
+        shell: bash
+        run: |
+          set -o pipefail
+          node --test test/*.test.js 2>&1 | tee ../validation-report/gateway-tests.log
       - name: Check release identity
         working-directory: gateway
-        run: node scripts/check-release.js
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/check-release.js 2>&1 | tee ../validation-report/release-consistency.log
       - name: Check MIDlet lifecycle
         working-directory: gateway
-        run: node scripts/check-midlet-lifecycle.js
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/check-midlet-lifecycle.js 2>&1 | tee ../validation-report/midlet-lifecycle.log
       - name: Check Ant project
-        run: ant -projecthelp
+        shell: bash
+        run: |
+          set -o pipefail
+          ant -projecthelp 2>&1 | tee validation-report/ant-project.log
+      - name: Collect runtime diagnostics
+        if: always()
+        run: |
+          java -version 2> validation-report/java-version.txt || true
+          node --version > validation-report/node-version.txt 2>&1 || true
+          ant -version > validation-report/ant-version.txt 2>&1 || true
+      - name: Upload validation diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netormium-validation-report
+          path: validation-report/
+          if-no-files-found: warn
