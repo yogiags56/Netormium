@@ -160,7 +160,9 @@ const checks = [
     read('src/com/netormium/client/net/GatewayPageLoader.java').includes('new ByteArrayOutputStream(4096)')],
   ['About displays the Netormium browser version and asynchronously fetched Chromium version',
     canvas.includes('Browser version: 1.0.0-rc21') &&
+    canvas.includes('Gateway version: Checking...') &&
     canvas.includes('Chromium version: Checking...') &&
+    canvas.includes('Connection: Checking...') &&
     canvas.includes('interactive.getRuntimeInfo()') &&
     canvas.includes('alert.setString(')],
   ['gateway exposes the actual running Playwright Chromium version',
@@ -168,6 +170,9 @@ const checks = [
     read('gateway/server.js').includes("'CHROMIUM\\t' + browser.version()")],
   ['MIDlet runtime info parser reads gateway and Chromium version fields',
     read('src/com/netormium/client/net/InteractiveGateway.java').includes('public String getRuntimeInfo()') &&
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('Connection: Connected') &&
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('Gateway version: ') &&
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('Chromium version: ') &&
     read('src/com/netormium/client/net/InteractiveGateway.java').includes('line.startsWith("GATEWAY\\t")') &&
     read('src/com/netormium/client/net/InteractiveGateway.java').includes('line.startsWith("CHROMIUM\\t")')]
 ];
