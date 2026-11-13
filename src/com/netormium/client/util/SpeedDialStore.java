@@ -53,23 +53,40 @@ public final class SpeedDialStore {
     public boolean delete(String url) {
         if (url == null) return false;
         RecordStore rs = null;
+        RecordEnumeration en = null;
+        int deleteId = -1;
         try {
             rs = RecordStore.openRecordStore(STORE, false);
-            RecordEnumeration en = rs.enumerateRecords(null, null, false);
-            try {
-                while (en.hasNextElement()) {
-                    int id = en.nextRecordId();
-                    DataInputStream in = new DataInputStream(
-                        new ByteArrayInputStream(rs.getRecord(id)));
-                    in.readUTF();
-                    if (url.equals(in.readUTF())) {
-                        rs.deleteRecord(id);
-                        return true;
-                    }
-                }
-            } finally { en.destroy(); }
-        } catch (Exception e) { return false; }
-        finally { try { if (rs != null) rs.closeRecordStore(); } catch (Exception ignored) {} }
+            en = rs.enumerateRecords(null, null, false);
+            while (en.hasNextElement() && deleteId < 0) {
+                int id = en.nextRecordId();
+                DataInputStream in = new DataInputStream(
+                    new ByteArrayInputStream(rs.getRecord(id)));
+                in.readUTF();
+                String storedUrl = in.readUTF();
+                in.close();
+                if (url.equals(storedUrl)) deleteId = id;
+            }
+            en.destroy();
+            en = null;
+            if (deleteId > 0) {
+                rs.deleteRecord(deleteId);
+                rs.closeRecordStore();
+                rs = null;
+                return true;
+            }
+        } catch (Exception e) {
+            if (en != null) {
+                try { en.destroy(); } catch (Exception ignored) {}
+            }
+            if (rs != null) {
+                try { rs.closeRecordStore(); } catch (Exception ignored) {}
+            }
+            return false;
+        }
+        if (rs != null) {
+            try { rs.closeRecordStore(); } catch (Exception ignored) {}
+        }
         return false;
     }
 
