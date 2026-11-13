@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       run_java_me_release:
-        description: "Run genuine Java ME release gate (requires SDK + ECJ configured on runner)"
+        description: "Run genuine Java ME release gate (requires SDK APIs, ECJ and preverifier configured as repository variables)"
         required: false
         type: boolean
         default: false
@@ -22,7 +22,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: "22"
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -43,10 +43,10 @@ jobs:
         working-directory: gateway
         run: npm run check:release
 
-      - name: Ant build diagnostics
-        run: ant doctor
+      - name: Ant project diagnostics
+        run: ant -projecthelp
 
-      - name: Archive diagnostic output
+      - name: Archive non-blocking toolchain diagnostic
         if: always()
         run: |
           mkdir -p browser-build-report
@@ -66,6 +66,12 @@ jobs:
   java-me-release:
     if: ${{ inputs.run_java_me_release }}
     runs-on: ubuntu-latest
+    env:
+      CLDC_API_JAR: ${{ vars.CLDC_API_JAR }}
+      MIDP_API_JAR: ${{ vars.MIDP_API_JAR }}
+      PREVERIFY: ${{ vars.PREVERIFY }}
+      ECJ_JAR: ${{ vars.ECJ_JAR }}
+      NETORMIUM_COMPILER: ecj
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -82,21 +88,34 @@ jobs:
           sudo apt-get install -y ant
 
       - name: Require externally provisioned Java ME toolchain
-        env:
-          JAVA_ME_SDK_HOME: ${{ vars.JAVA_ME_SDK_HOME }}
-          ECJ_JAR: ${{ vars.ECJ_JAR }}
+        shell: bash
         run: |
-          test -n "$JAVA_ME_SDK_HOME" || { echo "JAVA_ME_SDK_HOME is not configured"; exit 2; }
-          test -n "$ECJ_JAR" || { echo "ECJ_JAR is not configured"; exit 2; }
-          test -d "$JAVA_ME_SDK_HOME" || { echo "SDK path is unavailable on hosted runner"; exit 2; }
-          test -f "$ECJ_JAR" || { echo "ECJ JAR is unavailable on hosted runner"; exit 2; }
-          echo "Paths are configured. SDK contents must still pass toolchain validation."
+          set -euo pipefail
+          for name in CLDC_API_JAR MIDP_API_JAR PREVERIFY ECJ_JAR; do
+            value="${!name:-}"
+            test -n "$value" || { echo "$name repository variable is not configured"; exit 2; }
+            test -e "$value" || { echo "$name path does not exist on the hosted runner: $value"; exit 2; }
+          done
+          test -f "$CLDC_API_JAR"
+          test -f "$MIDP_API_JAR"
+          test -f "$ECJ_JAR"
+          test -x "$PREVERIFY"
 
-      - name: Discover and validate Java ME SDK
+      - name: Configure and validate Java ME toolchain
+        shell: bash
         run: |
-          node gateway/scripts/check-j2me-toolchain.js --help || true
+          set -euo pipefail
+          cat > build.properties <<EOF
+          cldc.api.jar=$CLDC_API_JAR
+          midp.api.jar=$MIDP_API_JAR
+          preverify.executable=$PREVERIFY
+          compiler.backend=ecj
+          ecj.jar=$ECJ_JAR
+          EOF
           ant doctor
-          ant -Dcompiler.backend=ecj -Decj.jar="$ECJ_JAR" -Djava.me.sdk="$JAVA_ME_SDK_HOME" release
+
+      - name: Build and validate MIDlet JAR/JAD
+        run: ant -propertyfile build.properties clean release
 
       - name: Upload MIDlet package
         if: success()
