@@ -18,6 +18,7 @@ function makeFixture() {
     'MIDlet-Version: 1.0.0',
     'MIDlet-Vendor: Netormium Project',
     'MIDlet-1: Netormium,,com.netormium.client.NetormiumMIDlet',
+    'MIDlet-Permissions: javax.microedition.io.Connector.http, javax.microedition.io.Connector.https',
     'MicroEdition-Profile: MIDP-2.0',
     'MicroEdition-Configuration: CLDC-1.1',
     ''
@@ -32,6 +33,7 @@ function makeFixture() {
     'MIDlet-Version: 1.0.0',
     'MIDlet-Vendor: Netormium Project',
     'MIDlet-1: Netormium,,com.netormium.client.NetormiumMIDlet',
+    'MIDlet-Permissions: javax.microedition.io.Connector.http, javax.microedition.io.Connector.https',
     'MIDlet-Jar-URL: Netormium.jar',
     `MIDlet-Jar-Size: ${size}`,
     'MicroEdition-Profile: MIDP-2.0',
