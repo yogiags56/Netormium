@@ -46,6 +46,12 @@ const checks = [
     read('src/com/netormium/client/util/BookmarkStore.java').includes('if (exists) return true;') &&
     read('src/com/netormium/client/util/BookmarkStore.java').indexOf('if (exists) return true;') >
       read('src/com/netormium/client/util/BookmarkStore.java').indexOf('en.destroy();')],
+  ['bookmark manager supports persistent rename and delete',
+    read('src/com/netormium/client/util/BookmarkStore.java').includes('public boolean delete(String url)') &&
+    read('src/com/netormium/client/util/BookmarkStore.java').includes('public boolean rename(String url, String title)') &&
+    canvas.includes('renameBookmarkCommand') && canvas.includes('deleteBookmarkCommand') &&
+    canvas.includes('bookmarks.rename(bookmarkUrls[selectedBookmark], title)') &&
+    canvas.includes('bookmarks.delete(bookmarkUrls[selected])')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&
