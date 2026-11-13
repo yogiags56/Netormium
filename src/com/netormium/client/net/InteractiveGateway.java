@@ -224,11 +224,28 @@ public final class InteractiveGateway {
                     : "Gateway HTTP " + code;
                 return null;
             }
+            long declaredLength = connection.getLength();
+            if (declaredLength > maxBytes) {
+                lastTransportError = "Gateway response exceeds client limit";
+                return null;
+            }
             input = connection.openInputStream();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream(
+                declaredLength > 0 ? (int)declaredLength : Math.min(maxBytes, 4096));
             byte[] buffer = new byte[1024];
             int count, total = 0;
             while ((count = input.read(buffer)) != -1) {
+                if (count == 0) {
+                    int single = input.read();
+                    if (single < 0) break;
+                    total++;
+                    if (total > maxBytes) {
+                        lastTransportError = "Gateway response exceeds client limit";
+                        return null;
+                    }
+                    out.write(single);
+                    continue;
+                }
                 total += count;
                 if (total > maxBytes) {
                     lastTransportError = "Gateway response exceeds client limit";
