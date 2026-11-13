@@ -66,6 +66,11 @@ const checks = [
     canvas.includes('loadUrl(items[selected - 1].url, true)') &&
     canvas.includes('loadUrl(items[dial].url, true)') &&
     canvas.includes('renameSpeedDialCommand') && canvas.includes('deleteSpeedDialCommand')],
+  ['Speed Dial supports persistent adjacent reordering',
+    read('src/com/netormium/client/util/SpeedDialStore.java').includes('public boolean move(String url, int offset)') &&
+    read('src/com/netormium/client/util/SpeedDialStore.java').includes('int target = index + offset;') &&
+    canvas.includes('moveSpeedDialUpCommand') && canvas.includes('moveSpeedDialDownCommand') &&
+    canvas.includes('speedDial.move(speedDialUrls[selected], direction)')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&
