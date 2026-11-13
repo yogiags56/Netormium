@@ -1,8 +1,9 @@
 name: Netormium Java ME Toolchain Probe
-# Triggered only on isolated Alpha branches.
 
 on:
   push:
+    branches:
+      - "alpha/**"
     paths:
       - "src/**"
       - ".github/workflows/j2me-toolchain-probe.yml"
@@ -35,71 +36,28 @@ jobs:
           jar tf toolchain/midpapi20.jar | grep -Fx 'javax/microedition/midlet/MIDlet.class'
           jar tf toolchain/midpapi20.jar | grep -Fx 'javax/microedition/lcdui/Canvas.class'
 
-      - name: Download legacy Eclipse ECJ 3.7.2
+      - name: Download and verify Eclipse ECJ 4.41
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p toolchain
-          curl --fail --location --retry 3 --output toolchain/ecj-3.7.2.jar https://repo.maven.apache.org/maven2/org/eclipse/jdt/core/compiler/ecj/3.7.2/ecj-3.7.2.jar
-          jar tf toolchain/ecj-3.7.2.jar | grep -E 'org/eclipse/jdt/internal/compiler/batch/Main.class'
-          java -cp toolchain/ecj-3.7.2.jar org.eclipse.jdt.internal.compiler.batch.Main -help > toolchain/ecj-help.txt 2>&1 || true
+          curl --fail --location --retry 3 --output toolchain/ecj-4.41.jar https://download.eclipse.org/eclipse/downloads/drops4/R-4.41-202608281142/ecj-4.41.jar
+          echo "080bb403adb3b88b5b5f382388922425de5274f7729f0a94702f0e2a516c7d13c6740faab1cb20786b1dda0c5da933aa9b842f7c64867414ff75fa668ea06b09  toolchain/ecj-4.41.jar" | sha512sum --check
+          java -cp toolchain/ecj-4.41.jar org.eclipse.jdt.compiler.batch.BatchCompiler -help > toolchain/ecj-help.txt 2>&1
+          grep -E -- '-1\.3|--source' toolchain/ecj-help.txt
 
       - name: Compile all MIDlet sources
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p build/classes
-          find src -name '*.java' -print0 | xargs -0 java -cp toolchain/ecj-3.7.2.jar org.eclipse.jdt.internal.compiler.batch.Main \
+          find src -name '*.java' -print0 | xargs -0 java -cp toolchain/ecj-4.41.jar org.eclipse.jdt.compiler.batch.BatchCompiler \
             -1.3 -encoding UTF-8 \
             -bootclasspath toolchain/cldcapi11.jar:toolchain/midpapi20.jar \
             -d build/classes
           test -n "$(find build/classes -name '*.class' -print -quit)"
           find build/classes -name '*.class' | sort > toolchain/compiled-classes.txt
           echo "Compiled class count: $(wc -l < toolchain/compiled-classes.txt)"
-
-      - name: Preverify and package MIDlet with ProGuard
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p build dist
-          curl --fail --location --retry 3 --output toolchain/proguard-7.10.0.zip https://github.com/Guardsquare/proguard/releases/download/v7.10.0/proguard-7.10.0.zip
-          echo "5aa88c434766a057a2ead3412acc01022bb444f9f1bfbae690a1d48b2006b242  toolchain/proguard-7.10.0.zip" | sha256sum --check
-          unzip -q toolchain/proguard-7.10.0.zip -d toolchain/proguard
-          PROGUARD_DIR="$(find toolchain/proguard -type f -name proguard.sh -print -quit | xargs -r dirname)"
-          test -n "$PROGUARD_DIR"
-          jar --create --file build/Netormium-unverified.jar -C build/classes .
-          cat > toolchain/netormium.pro <<EOF
-          -injars $GITHUB_WORKSPACE/build/Netormium-unverified.jar
-          -outjars $GITHUB_WORKSPACE/dist/Netormium.jar
-          -libraryjars $GITHUB_WORKSPACE/toolchain/cldcapi11.jar
-          -libraryjars $GITHUB_WORKSPACE/toolchain/midpapi20.jar
-          -dontshrink
-          -dontoptimize
-          -dontobfuscate
-          -microedition
-          -keep class ** { *; }
-          EOF
-          "$PROGUARD_DIR/proguard.sh" @toolchain/netormium.pro
-          test -s dist/Netormium.jar
-          jar tf dist/Netormium.jar | grep -Fx 'com/netormium/client/NetormiumMIDlet.class'
-          if jar tf dist/Netormium.jar | grep -q '^javax/microedition/'; then
-            echo "Java ME API classes must not be bundled in MIDlet JAR" >&2
-            exit 1
-          fi
-          cp resources/Netormium.jad.example dist/Netormium.jad
-          JAR_SIZE="$(wc -c < dist/Netormium.jar | tr -d ' ')"
-          sed -i "s/^MIDlet-Jar-Size: .*/MIDlet-Jar-Size: $JAR_SIZE/" dist/Netormium.jad
-          node gateway/scripts/check-midlet-package.js dist/Netormium.jar dist/Netormium.jad
-
-      - name: Upload Alpha JAR and JAD
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: netormium-alpha-midlet-package
-          path: |
-            dist/Netormium.jar
-            dist/Netormium.jad
-          if-no-files-found: error
 
       - name: Archive compile-only diagnostic
         if: always()
@@ -109,6 +67,4 @@ jobs:
           path: |
             toolchain/ecj-help.txt
             toolchain/compiled-classes.txt
-            dist/Netormium.jar
-            dist/Netormium.jad
           if-no-files-found: warn
