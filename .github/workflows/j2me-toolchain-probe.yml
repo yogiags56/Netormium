@@ -2,8 +2,6 @@ name: Netormium Java ME Toolchain Probe
 
 on:
   push:
-    branches:
-      - "alpha/**"
     paths:
       - "src/**"
       - ".github/workflows/j2me-toolchain-probe.yml"
