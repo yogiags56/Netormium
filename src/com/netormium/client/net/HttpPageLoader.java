@@ -25,7 +25,7 @@ public final class HttpPageLoader {
         try {
             connection = (HttpConnection) Connector.open(url, Connector.READ, true);
             connection.setRequestMethod(HttpConnection.GET);
-            connection.setRequestProperty("User-Agent", "Netormium/0.2 (Java ME)");
+            connection.setRequestProperty("User-Agent", "Netormium/1.0-rc20 (Java ME)");
             connection.setRequestProperty("Accept", "text/html,text/plain,*/*");
             connection.setRequestProperty("Accept-Encoding", "identity");
 
