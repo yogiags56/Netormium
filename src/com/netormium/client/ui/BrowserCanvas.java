@@ -327,6 +327,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         chooser.append("Settings", null);
         chooser.append("Page information", null);
         chooser.append("Diagnostics", null);
+        chooser.append("About Netormium", null);
         chooser.append("Exit", null);
         chooser.addCommand(new Command("Back", Command.BACK, 1));
         chooser.setCommandListener(this);
@@ -350,7 +351,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         else if (selected == 12) showSettings();
         else if (selected == 13) showPageInformation();
         else if (selected == 14) showDiagnostics();
-        else if (selected == 15) midlet.exit();
+        else if (selected == 15) showAbout();
+        else if (selected == 16) midlet.exit();
         else Display.getDisplay(midlet).setCurrent(this);
     }
 
