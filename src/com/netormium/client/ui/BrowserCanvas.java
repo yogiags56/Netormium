@@ -722,6 +722,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                         selected.width - 2, selected.height - 2);
                 }
             }
+        } else if (currentUrl.length() == 0) {
+            paintStartPage(g, w, contentTop, contentBottom, body, title);
         } else {
             g.setColor(ThemeManager.FOREGROUND);
             g.setFont(title);
@@ -756,6 +758,79 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         if (status.length() > 0 && h > 150) {
             g.drawString(status, w / 2, footerY - 1,
                 Graphics.HCENTER | Graphics.BOTTOM);
+        }
+    }
+
+    private void paintStartPage(Graphics g, int width, int top, int bottom,
+        Font body, Font title) {
+        int centerX = width / 2;
+        int logoY = top + 8;
+        int logoSize = Math.min(42, Math.max(30, width / 6));
+        int logoX = centerX - (logoSize / 2);
+
+        g.setColor(ThemeManager.ACCENT);
+        g.fillArc(logoX, logoY, logoSize, logoSize, 0, 360);
+        g.setColor(ThemeManager.BACKGROUND);
+        g.drawArc(logoX + 5, logoY + 5, logoSize - 10, logoSize - 10, 0, 360);
+        g.drawArc(logoX + (logoSize / 3), logoY + 2, logoSize / 3,
+            logoSize - 4, 90, 180);
+        g.drawArc(logoX + (logoSize / 3), logoY + 2, logoSize / 3,
+            logoSize - 4, 270, 180);
+        g.drawLine(logoX + 3, logoY + (logoSize / 2),
+            logoX + logoSize - 3, logoY + (logoSize / 2));
+
+        g.setColor(ThemeManager.HEADER_FOREGROUND);
+        g.setFont(title);
+        g.drawString("Netormium", centerX, logoY + logoSize + 3,
+            Graphics.HCENTER | Graphics.TOP);
+        g.setFont(body);
+        g.setColor(ThemeManager.MUTED);
+        g.drawString("Explore the web", centerX,
+            logoY + logoSize + title.getHeight() + 5,
+            Graphics.HCENTER | Graphics.TOP);
+
+        int sectionY = logoY + logoSize + title.getHeight() + body.getHeight() + 15;
+        g.setColor(ThemeManager.HEADER_FOREGROUND);
+        g.drawString("Speed Dial", 5, sectionY, Graphics.LEFT | Graphics.TOP);
+        sectionY += body.getHeight() + 5;
+
+        BookmarkStore.Bookmark[] items = bookmarks.all();
+        if (items.length == 0) {
+            g.setColor(ThemeManager.MUTED);
+            g.drawString("No Speed Dial entries yet.", 7, sectionY + 5,
+                Graphics.LEFT | Graphics.TOP);
+            g.drawString("Open a site and choose Add Bookmark.", 7,
+                sectionY + body.getHeight() + 9, Graphics.LEFT | Graphics.TOP);
+            return;
+        }
+
+        int columns = width >= 220 ? 2 : 1;
+        int gap = 5;
+        int tileWidth = (width - 10 - ((columns - 1) * gap)) / columns;
+        int tileHeight = Math.max(30, body.getHeight() + 13);
+        int visible = Math.min(6, items.length);
+        for (int i = 0; i < visible; i++) {
+            int column = i % columns;
+            int row = i / columns;
+            int x = 5 + column * (tileWidth + gap);
+            int y = sectionY + row * (tileHeight + gap);
+            if (y + tileHeight > bottom) break;
+            g.setColor(ThemeManager.HEADER_BACKGROUND);
+            g.fillRect(x, y, tileWidth, tileHeight);
+            g.setColor(ThemeManager.BORDER);
+            g.drawRect(x, y, tileWidth - 1, tileHeight - 1);
+            g.setColor(ThemeManager.ACCENT);
+            g.drawString(String.valueOf(i + 1), x + 5, y + 3,
+                Graphics.LEFT | Graphics.TOP);
+            g.setColor(ThemeManager.FOREGROUND);
+            g.drawString(clip(items[i].title, body, tileWidth - 25),
+                x + 19, y + 3, Graphics.LEFT | Graphics.TOP);
+        }
+        if (items.length > visible) {
+            g.setColor(ThemeManager.MUTED);
+            g.drawString("Add Bookmark to grow your Speed Dial.",
+                5, Math.min(bottom - body.getHeight(), sectionY +
+                3 * (tileHeight + gap)), Graphics.LEFT | Graphics.TOP);
         }
     }
 
@@ -802,7 +877,12 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             activateSelectedElement();
         } else if (keyCode >= KEY_NUM1 && keyCode <= KEY_NUM9) {
             int selected = keyCode - KEY_NUM0;
-            if (sessionId.length() > 0 && selected > 0 && selected <= interactiveElements.length) {
+            if (currentUrl.length() == 0) {
+                BookmarkStore.Bookmark[] items = bookmarks.all();
+                if (selected > 0 && selected <= items.length && selected <= 6) {
+                    loadUrl(items[selected - 1].url, true);
+                }
+            } else if (sessionId.length() > 0 && selected > 0 && selected <= interactiveElements.length) {
                 com.netormium.client.net.InteractiveGateway.Element element =
                     interactiveElements[selected - 1];
                 tapPage(element.x + (element.width / 2), element.y + (element.height / 2));
