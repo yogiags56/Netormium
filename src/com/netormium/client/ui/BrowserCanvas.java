@@ -39,6 +39,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private final SpeedDialStore speedDial = new SpeedDialStore();
     private String[] speedDialUrls = new String[0];
     private int selectedSpeedDial = -1;
+    private int startPageSelection = 0;
     private final Command renameSpeedDialCommand = new Command("Rename", Command.SCREEN, 1);
     private final Command deleteSpeedDialCommand = new Command("Delete", Command.SCREEN, 2);
     private final Command moveSpeedDialUpCommand = new Command("Move Up", Command.SCREEN, 3);
@@ -991,19 +992,34 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         g.fillRect(0, 0, w, h);
 
         int headerH = layout.getAddressBarHeight();
-        g.setColor(ThemeManager.HEADER_BACKGROUND);
+        g.setColor(0xDCE6F0);
         g.fillRect(0, 0, w, headerH);
-        g.setColor(ThemeManager.BORDER);
-        g.drawRect(0, 0, w - 1, headerH - 1);
+        g.setColor(0x8298AE);
+        g.drawLine(0, headerH - 1, w, headerH - 1);
+        int globe = Math.min(12, headerH - 5);
+        int globeY = (headerH - globe) / 2;
+        g.setColor(ThemeManager.ACCENT);
+        g.fillArc(4, globeY, globe, globe, 0, 360);
+        g.setColor(0xFFFFFF);
+        if (globe > 6) {
+            g.drawArc(6, globeY + 2, globe - 4, globe - 4, 0, 360);
+            g.drawLine(5, globeY + globe / 2, 3 + globe, globeY + globe / 2);
+        }
         g.setFont(body);
-        g.setColor(ThemeManager.HEADER_FOREGROUND);
-        String addressLabel = currentUrl.length() == 0 ? "Netormium - Open" : currentUrl;
-        g.drawString(clip(addressLabel, body, w - 10), 5, headerH / 2,
+        g.setColor(0x18334D);
+        String addressLabel = currentUrl.length() == 0 ? "Search or enter address" : currentUrl;
+        g.drawString(clip(addressLabel, body, w - globe - 15), globe + 9, headerH / 2,
             Graphics.LEFT | Graphics.VCENTER);
+        g.setColor(0xFFFFFF);
+        g.fillRect(w - 17, 2, 15, headerH - 5);
+        g.setColor(0x71869A);
+        g.drawRect(w - 17, 2, 14, headerH - 6);
+        g.drawString("Go", w - 10, headerH / 2, Graphics.HCENTER | Graphics.VCENTER);
 
         int contentTop = headerH + 3;
         int footerH = layout.getToolbarHeight();
-        int contentBottom = h - footerH - 2;
+        int footerY = h - footerH;
+        int contentBottom = footerY - 2;
         int available = contentBottom - contentTop;
 
         g.setClip(0, contentTop, w, available);
@@ -1039,144 +1055,131 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         }
         g.setClip(0, 0, w, h);
 
-        int footerY = h - footerH;
-        g.setColor(ThemeManager.HEADER_BACKGROUND);
+        g.setColor(0x244D70);
         g.fillRect(0, footerY, w, footerH);
-        g.setColor(ThemeManager.BORDER);
+        g.setColor(0x102F4B);
         g.drawLine(0, footerY, w, footerY);
         g.setFont(body);
-        g.setColor(ThemeManager.HEADER_FOREGROUND);
-        g.drawString("Open", 3, footerY + footerH / 2,
+        g.setColor(0xFFFFFF);
+        g.drawString("Menu", 5, footerY + footerH / 2,
             Graphics.LEFT | Graphics.VCENTER);
-        g.drawString("Menu", w - 3, footerY + footerH / 2,
+        String rightSoftkey = currentUrl.length() == 0 ? "Open" : "Select";
+        g.drawString(rightSoftkey, w - 5, footerY + footerH / 2,
             Graphics.RIGHT | Graphics.VCENTER);
 
-        g.setColor(ThemeManager.MUTED);
         if (status.length() > 0 && h > 150) {
-            g.drawString(status, w / 2, footerY - 1,
+            g.setColor(ThemeManager.MUTED);
+            g.drawString(clip(status, body, w - 8), w / 2, footerY - 1,
                 Graphics.HCENTER | Graphics.BOTTOM);
         }
     }
 
     private void paintStartPage(Graphics g, int width, int top, int bottom,
         Font body, Font title) {
-        int centerX = width / 2;
-        int logoY = top + 8;
-        int logoSize = Math.min(42, Math.max(30, width / 6));
-        int logoX = centerX - (logoSize / 2);
-
+        int logoSize = 15;
+        int logoX = 7;
+        int logoY = top + 3;
         g.setColor(ThemeManager.ACCENT);
         g.fillArc(logoX, logoY, logoSize, logoSize, 0, 360);
-        g.setColor(ThemeManager.BACKGROUND);
-        g.drawArc(logoX + 5, logoY + 5, logoSize - 10, logoSize - 10, 0, 360);
-        g.drawArc(logoX + (logoSize / 3), logoY + 2, logoSize / 3,
-            logoSize - 4, 90, 180);
-        g.drawArc(logoX + (logoSize / 3), logoY + 2, logoSize / 3,
-            logoSize - 4, 270, 180);
-        g.drawLine(logoX + 3, logoY + (logoSize / 2),
-            logoX + logoSize - 3, logoY + (logoSize / 2));
-
-        g.setColor(ThemeManager.HEADER_FOREGROUND);
+        g.setColor(0xFFFFFF);
+        g.drawArc(logoX + 3, logoY + 3, logoSize - 6, logoSize - 6, 0, 360);
+        g.drawLine(logoX + 7, logoY + 1, logoX + 7, logoY + logoSize - 1);
+        g.setColor(0x18334D);
         g.setFont(title);
-        g.drawString("Netormium", centerX, logoY + logoSize + 3,
-            Graphics.HCENTER | Graphics.TOP);
+        g.drawString("Netormium", logoX + logoSize + 5, logoY,
+            Graphics.LEFT | Graphics.TOP);
         g.setFont(body);
         g.setColor(ThemeManager.MUTED);
-        g.drawString("Explore the web", centerX,
-            logoY + logoSize + title.getHeight() + 5,
-            Graphics.HCENTER | Graphics.TOP);
+        g.drawString("Speed Dial", width - 6, logoY + 2,
+            Graphics.RIGHT | Graphics.TOP);
 
-        int searchY = logoY + logoSize + title.getHeight() + body.getHeight() + 13;
-        int searchHeight = Math.max(25, body.getHeight() + 12);
-        g.setColor(ThemeManager.HEADER_BACKGROUND);
-        g.fillRoundRect(5, searchY, width - 10, searchHeight, 7, 7);
-        g.setColor(ThemeManager.BORDER);
-        g.drawRoundRect(5, searchY, width - 11, searchHeight, 7, 7);
-        g.setColor(ThemeManager.MUTED);
-        g.drawString("Search or enter address", 12, searchY + 5, Graphics.LEFT | Graphics.TOP);
+        int searchY = top + 23;
+        int searchHeight = Math.max(20, body.getHeight() + 8);
+        g.setColor(0xFFFFFF);
+        g.fillRect(5, searchY, width - 10, searchHeight);
+        g.setColor(0x879BAE);
+        g.drawRect(5, searchY, width - 11, searchHeight - 1);
+        g.setColor(0x687D91);
+        g.drawString("Search or enter address", 10, searchY + searchHeight / 2,
+            Graphics.LEFT | Graphics.VCENTER);
 
-        int shortcutY = searchY + searchHeight + 6;
-        int shortcutHeight = Math.max(22, body.getHeight() + 8);
-        int shortcutWidth = (width - 15) / 2;
-        g.setColor(ThemeManager.ACCENT);
-        g.drawRoundRect(5, shortcutY, shortcutWidth, shortcutHeight, 6, 6);
-        g.drawRoundRect(10 + shortcutWidth, shortcutY, shortcutWidth, shortcutHeight, 6, 6);
-        g.setColor(ThemeManager.FOREGROUND);
-        g.drawString("Bookmarks", 5 + shortcutWidth / 2, shortcutY + 4, Graphics.HCENTER | Graphics.TOP);
-        g.drawString("History", 10 + shortcutWidth + shortcutWidth / 2, shortcutY + 4, Graphics.HCENTER | Graphics.TOP);
-
-        int sectionY = shortcutY + shortcutHeight + 8;
-        g.setColor(ThemeManager.HEADER_FOREGROUND);
-        g.drawString("Speed Dial", 5, sectionY, Graphics.LEFT | Graphics.TOP);
-        sectionY += body.getHeight() + 5;
+        int labelY = searchY + searchHeight + 7;
+        g.setColor(0x315A7C);
+        g.setFont(body);
+        g.drawString("TOP SITES", 6, labelY, Graphics.LEFT | Graphics.TOP);
+        int gridY = labelY + body.getHeight() + 4;
 
         SpeedDialStore.Entry[] items = speedDial.all();
         if (items.length == 0) {
-            g.setColor(ThemeManager.MUTED);
-            g.drawString("No Speed Dial entries yet.", 7, sectionY + 5,
+            g.setColor(0x718397);
+            g.drawString("Your favorite sites appear here.", 7, gridY + 5,
                 Graphics.LEFT | Graphics.TOP);
-            g.drawString("Open a site and choose Add to Speed Dial.", 7,
-                sectionY + body.getHeight() + 9, Graphics.LEFT | Graphics.TOP);
+            g.drawString("Open a page and choose Add to Speed Dial.",
+                7, gridY + body.getHeight() + 8, Graphics.LEFT | Graphics.TOP);
             return;
         }
 
-        int columns = width >= 220 ? 2 : 1;
-        int gap = 5;
-        int tileWidth = (width - 10 - ((columns - 1) * gap)) / columns;
-        int tileHeight = Math.max(30, body.getHeight() + 13);
-        int visible = Math.min(6, items.length);
+        int columns = width >= 220 ? 3 : 2;
+        int gap = width >= 220 ? 5 : 4;
+        int tileWidth = (width - 12 - ((columns - 1) * gap)) / columns;
+        int tileHeight = width >= 220 ? 51 : 43;
+        int thumbHeight = width >= 220 ? 28 : 22;
+        int visible = Math.min(9, items.length);
         for (int i = 0; i < visible; i++) {
             int column = i % columns;
             int row = i / columns;
-            int x = 5 + column * (tileWidth + gap);
-            int y = sectionY + row * (tileHeight + gap);
+            int x = 6 + column * (tileWidth + gap);
+            int y = gridY + row * (tileHeight + gap);
             if (y + tileHeight > bottom) break;
-            g.setColor(ThemeManager.HEADER_BACKGROUND);
-            g.fillRect(x, y, tileWidth, tileHeight);
-            g.setColor(ThemeManager.BORDER);
+            int shade = i % 3;
+            int thumbColor = shade == 0 ? 0xD7E5EF : (shade == 1 ? 0xE3E8D9 : 0xE8DFD5);
+            g.setColor(thumbColor);
+            g.fillRect(x, y, tileWidth, thumbHeight);
+            g.setColor(0x9AAABA);
             g.drawRect(x, y, tileWidth - 1, tileHeight - 1);
+            g.setColor(0xFFFFFF);
+            g.fillRect(x + 3, y + 3, Math.max(5, tileWidth - 6), Math.max(5, thumbHeight - 6));
             g.setColor(ThemeManager.ACCENT);
-            g.drawString(String.valueOf(i + 1), x + 5, y + 3,
+            g.fillRect(x + 3, y + 3, Math.max(5, tileWidth - 6), 3);
+            g.setColor(0x4B6277);
+            g.drawString(String.valueOf(i + 1), x + 5, y + 7,
                 Graphics.LEFT | Graphics.TOP);
-            g.setColor(ThemeManager.FOREGROUND);
-            g.drawString(clip(items[i].title, body, tileWidth - 25),
-                x + 19, y + 3, Graphics.LEFT | Graphics.TOP);
+            g.setColor(0x24394D);
+            g.drawString(clip(items[i].title, body, tileWidth - 6),
+                x + 3, y + thumbHeight + 2, Graphics.LEFT | Graphics.TOP);
+            if (i == startPageSelection) {
+                g.setColor(0x0878C9);
+                g.drawRect(x - 1, y - 1, tileWidth + 1, tileHeight + 1);
+                g.drawRect(x, y, tileWidth - 1, tileHeight - 1);
+            }
         }
         if (items.length > visible) {
             g.setColor(ThemeManager.MUTED);
-            g.drawString("Manage all entries from Menu > Speed Dial.",
-                5, Math.min(bottom - body.getHeight(), sectionY +
-                3 * (tileHeight + gap)), Graphics.LEFT | Graphics.TOP);
+            g.drawString("More sites in Menu > Speed Dial",
+                6, Math.min(bottom - body.getHeight(), gridY + 3 * (tileHeight + gap)),
+                Graphics.LEFT | Graphics.TOP);
         }
     }
 
     private int speedDialIndexAt(int x, int y, int top, int bottom) {
         ScreenMetrics metrics = new ScreenMetrics(getWidth(), getHeight());
         Font body = ThemeManager.getBodyFont(metrics);
-        Font title = ThemeManager.getTitleFont();
-        int logoSize = Math.min(42, Math.max(30, getWidth() / 6));
-        int searchY = top + 8 + logoSize + title.getHeight() + body.getHeight() + 13;
-        int searchHeight = Math.max(25, body.getHeight() + 12);
-        if (y >= searchY && y < searchY + searchHeight && x >= 5 && x < getWidth() - 5) return -2;
-        int shortcutY = searchY + searchHeight + 6;
-        int shortcutHeight = Math.max(22, body.getHeight() + 8);
-        int shortcutWidth = (getWidth() - 15) / 2;
-        if (y >= shortcutY && y < shortcutY + shortcutHeight) {
-            if (x >= 5 && x < 5 + shortcutWidth) return -3;
-            if (x >= 10 + shortcutWidth && x < getWidth() - 5) return -4;
-        }
-        int sectionY = shortcutY + shortcutHeight + 8;
-        sectionY += body.getHeight() + 5;
-        int columns = getWidth() >= 220 ? 2 : 1;
-        int gap = 5;
-        int tileWidth = (getWidth() - 10 - ((columns - 1) * gap)) / columns;
-        int tileHeight = Math.max(30, body.getHeight() + 13);
-        if (y < sectionY) return -1;
-        int row = (y - sectionY) / (tileHeight + gap);
-        int column = (x - 5) / (tileWidth + gap);
+        int searchY = top + 23;
+        int searchHeight = Math.max(20, body.getHeight() + 8);
+        if (y >= searchY && y < searchY + searchHeight &&
+            x >= 5 && x < getWidth() - 5) return -2;
+        int labelY = searchY + searchHeight + 7;
+        int gridY = labelY + body.getHeight() + 4;
+        int columns = getWidth() >= 220 ? 3 : 2;
+        int gap = getWidth() >= 220 ? 5 : 4;
+        int tileWidth = (getWidth() - 12 - ((columns - 1) * gap)) / columns;
+        int tileHeight = getWidth() >= 220 ? 51 : 43;
+        if (y < gridY) return -1;
+        int row = (y - gridY) / (tileHeight + gap);
+        int column = (x - 6) / (tileWidth + gap);
         if (column < 0 || column >= columns || row < 0) return -1;
-        int tileX = 5 + column * (tileWidth + gap);
-        int tileY = sectionY + row * (tileHeight + gap);
+        int tileX = 6 + column * (tileWidth + gap);
+        int tileY = gridY + row * (tileHeight + gap);
         if (x < tileX || x >= tileX + tileWidth ||
             y < tileY || y >= tileY + tileHeight || tileY + tileHeight > bottom) return -1;
         return row * columns + column;
@@ -1190,10 +1193,11 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         if (y >= top && y < bottom && currentUrl.length() == 0) {
             int dial = speedDialIndexAt(x, y, top, bottom);
             if (dial == -2) { showAddressBox(); return; }
-            if (dial == -3) { showBookmarks(); return; }
-            if (dial == -4) { showHistory(); return; }
             SpeedDialStore.Entry[] items = speedDial.all();
-            if (dial >= 0 && dial < items.length) loadUrl(items[dial].url, true);
+            if (dial >= 0 && dial < items.length) {
+                startPageSelection = dial;
+                loadUrl(items[dial].url, true);
+            }
         } else if (y >= top && y < bottom && sessionId.length() > 0) {
             tapPage(x, y - top);
         } else if (y >= getHeight() - layout.getToolbarHeight()) {
@@ -1206,6 +1210,32 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
 
     protected void keyPressed(int keyCode) {
         int action = getGameAction(keyCode);
+        if (currentUrl.length() == 0 && pageImage == null) {
+            SpeedDialStore.Entry[] homeItems = speedDial.all();
+            int columns = getWidth() >= 220 ? 3 : 2;
+            if (action == LEFT && startPageSelection > 0) {
+                startPageSelection--;
+                repaint();
+                return;
+            } else if (action == RIGHT && startPageSelection + 1 < homeItems.length) {
+                startPageSelection++;
+                repaint();
+                return;
+            } else if (action == UP && startPageSelection - columns >= 0) {
+                startPageSelection -= columns;
+                repaint();
+                return;
+            } else if (action == DOWN && startPageSelection + columns < homeItems.length) {
+                startPageSelection += columns;
+                repaint();
+                return;
+            } else if (action == FIRE || keyCode == KEY_NUM5) {
+                if (startPageSelection >= 0 && startPageSelection < homeItems.length) {
+                    loadUrl(homeItems[startPageSelection].url, true);
+                } else showAddressBox();
+                return;
+            }
+        }
         if (action == UP) {
             scrollY -= 120;
             if (scrollY < 0) scrollY = 0;
