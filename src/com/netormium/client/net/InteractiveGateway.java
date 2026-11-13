@@ -230,8 +230,7 @@ public final class InteractiveGateway {
                 return null;
             }
             input = connection.openInputStream();
-            ByteArrayOutputStream out = new ByteArrayOutputStream(
-                declaredLength > 0 ? (int)declaredLength : Math.min(maxBytes, 4096));
+            ByteArrayOutputStream out = new ByteArrayOutputStream(4096);
             byte[] buffer = new byte[1024];
             int count, total = 0;
             while ((count = input.read(buffer)) != -1) {
