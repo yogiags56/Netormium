@@ -67,6 +67,7 @@ jobs:
           PROGUARD_DIR="$(find toolchain/proguard -type f -name proguard.sh -print -quit | xargs -r dirname)"
           test -n "$PROGUARD_DIR"
           jar --create --file build/Netormium-unverified.jar -C build/classes .
+          printf 'Manifest-Version: 1.0\r\nMIDlet-Name: Netormium\r\nMIDlet-Version: 1.0.0\r\nMIDlet-Vendor: Netormium Project\r\nMIDlet-1: Netormium,,com.netormium.client.NetormiumMIDlet\r\nMicroEdition-Profile: MIDP-2.0\r\nMicroEdition-Configuration: CLDC-1.1\r\n\r\n' > toolchain/Netormium-MANIFEST.MF
           cat > toolchain/netormium.pro <<EOF
           -injars $GITHUB_WORKSPACE/build/Netormium-unverified.jar
           -outjars $GITHUB_WORKSPACE/dist/Netormium.jar
@@ -80,6 +81,10 @@ jobs:
           EOF
           "$PROGUARD_DIR/proguard.sh" @toolchain/netormium.pro
           test -s dist/Netormium.jar
+          jar --update --file dist/Netormium.jar --manifest toolchain/Netormium-MANIFEST.MF
+          jar xf dist/Netormium.jar META-INF/MANIFEST.MF
+          grep -Fx 'MIDlet-Name: Netormium' META-INF/MANIFEST.MF
+          rm -rf META-INF
           jar tf dist/Netormium.jar | grep -Fx 'com/netormium/client/NetormiumMIDlet.class'
           if jar tf dist/Netormium.jar | grep -q '^javax/microedition/'; then
             echo "Java ME API classes must not be bundled in MIDlet JAR" >&2
