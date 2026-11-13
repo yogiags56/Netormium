@@ -98,8 +98,8 @@ jobs:
           (cd build/preverified && jar xf ../../dist/Netormium.jar)
           rm -rf build/preverified/META-INF
           jar --create --file dist/Netormium.jar --manifest toolchain/Netormium-MANIFEST.MF -C build/preverified .
-          unzip -p dist/Netormium.jar META-INF/MANIFEST.MF | grep -Fx 'MIDlet-Name: Netormium'
-          unzip -p dist/Netormium.jar META-INF/MANIFEST.MF | grep -Fx 'MicroEdition-Profile: MIDP-2.0'
+          unzip -p dist/Netormium.jar META-INF/MANIFEST.MF | tr -d '\r' | grep -Fx 'MIDlet-Name: Netormium'
+          unzip -p dist/Netormium.jar META-INF/MANIFEST.MF | tr -d '\r' | grep -Fx 'MicroEdition-Profile: MIDP-2.0'
           jar tf dist/Netormium.jar | grep -Fx 'com/netormium/client/NetormiumMIDlet.class'
           if jar tf dist/Netormium.jar | grep -q '^javax/microedition/'; then
             echo "Java ME API classes must not be bundled in MIDlet JAR" >&2
