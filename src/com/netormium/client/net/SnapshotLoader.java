@@ -44,8 +44,7 @@ public final class SnapshotLoader {
             long declaredLength = connection.getLength();
             if (declaredLength > MAX_IMAGE_BYTES) return null;
             input = connection.openInputStream();
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream(
-                declaredLength > 0 ? (int)declaredLength : 4096);
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream(4096);
             byte[] buffer = new byte[1024];
             int count, total = 0;
             while ((count = input.read(buffer)) != -1) {
