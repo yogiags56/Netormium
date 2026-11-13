@@ -48,6 +48,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private GatewayPageLoader.Link[] pageLinks = new GatewayPageLoader.Link[0];
 
     private final Command openCommand = new Command("Open", Command.SCREEN, 1);
+    private final Command menuCommand = new Command("Menu", Command.SCREEN, 2);
     private final Command homeCommand = new Command("Home", Command.SCREEN, 2);
     private final Command backCommand = new Command("Back", Command.BACK, 1);
     private final Command forwardCommand = new Command("Forward", Command.SCREEN, 3);
@@ -83,23 +84,9 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         snapshotLoader.configureBaseUrl(gatewayUrl);
         loader.configureBaseUrl(gatewayUrl);
         setFullScreenMode(false);
+        dataSaverEnabled = preferences.loadDataSaver(true);
         addCommand(openCommand);
-        addCommand(homeCommand);
-        addCommand(backCommand);
-        addCommand(forwardCommand);
-        addCommand(reloadCommand);
-        addCommand(typeCommand);
-        addCommand(enterCommand);
-        addCommand(dataSaverCommand);
-        addCommand(newTabCommand);
-        addCommand(tabsCommand);
-        addCommand(nextTabCommand);
-        addCommand(addBookmarkCommand);
-        addCommand(bookmarksCommand);
-        addCommand(historyCommand);
-        addCommand(stopCommand);
-        addCommand(diagnosticsCommand);
-        addCommand(exitCommand);
+        addCommand(menuCommand);
         setCommandListener(this);
         stateStore.load(tabs);
         historyStore.load(history);
@@ -134,10 +121,19 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             if (command == List.SELECT_COMMAND) {
                 int selected = chooser.getSelectedIndex();
                 if (selected >= 0) {
-                    if ("Open Tab".equals(chooser.getTitle())) switchTab(selected);
-                    else if ("Bookmarks".equals(chooser.getTitle()) && selected < bookmarkUrls.length)
+                    String title = chooser.getTitle();
+                    if ("Netormium Menu".equals(title)) {
+                        handleMainMenuSelection(selected);
+                        return;
+                    } else if ("Settings".equals(title)) {
+                        if (selected == 0) toggleDataSaver();
+                        else if (selected == 1) showDiagnostics();
+                        else showAbout();
+                        return;
+                    } else if ("Open Tab".equals(title)) switchTab(selected);
+                    else if ("Bookmarks".equals(title) && selected < bookmarkUrls.length)
                         loadUrl(bookmarkUrls[selected], true);
-                    else if ("History".equals(chooser.getTitle())) {
+                    else if ("History".equals(title)) {
                         String[] entries = history.entries();
                         int hi = entries.length - 1 - selected;
                         if (hi >= 0 && hi < entries.length) loadUrl(entries[hi], false);
@@ -148,6 +144,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             return;
         }
         if (command == openCommand) showAddressBox();
+        else if (command == menuCommand) showMainMenu();
         else if (command == homeCommand) showHome();
         else if (command == backCommand) navigateHistory(true);
         else if (command == forwardCommand) navigateHistory(false);
@@ -156,12 +153,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         else if (command == diagnosticsCommand) showDiagnostics();
         else if (command == typeCommand) showInputBox();
         else if (command == enterCommand) sendBrowserKey("Enter");
-        else if (command == dataSaverCommand) {
-            dataSaverEnabled = !dataSaverEnabled;
-            preferences.saveDataSaver(dataSaverEnabled);
-            if (currentUrl.length() > 0) loadUrl(currentUrl, false);
-            else { status = dataSaverEnabled ? "Data Saver enabled" : "Data Saver disabled"; repaint(); }
-        } else if (command == newTabCommand) createTab();
+        else if (command == dataSaverCommand) toggleDataSaver();
+        else if (command == newTabCommand) createTab();
         else if (command == tabsCommand) showTabs();
         else if (command == nextTabCommand) switchTab((tabs.activeIndex() + 1) % tabs.size());
         else if (command == addBookmarkCommand) addCurrentBookmark();
@@ -173,6 +166,89 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             pageText = "Navigation cancelled by user.";
             repaint();
         }
+    }
+
+    private void showMainMenu() {
+        chooser = new List("Netormium Menu", List.IMPLICIT);
+        chooser.append("Open address", null);
+        chooser.append("Start page", null);
+        chooser.append("Tabs", null);
+        chooser.append("New tab", null);
+        chooser.append("Bookmarks", null);
+        chooser.append("Add bookmark", null);
+        chooser.append("History", null);
+        chooser.append("Reload page", null);
+        chooser.append("Forward", null);
+        chooser.append(dataSaverEnabled ? "Data Saver: On" : "Data Saver: Off", null);
+        chooser.append("Settings", null);
+        chooser.append("Page information", null);
+        chooser.append("Diagnostics", null);
+        chooser.append("Exit", null);
+        chooser.addCommand(new Command("Back", Command.BACK, 1));
+        chooser.setCommandListener(this);
+        Display.getDisplay(midlet).setCurrent(chooser);
+    }
+
+    private void handleMainMenuSelection(int selected) {
+        if (selected == 0) showAddressBox();
+        else if (selected == 1) showHome();
+        else if (selected == 2) showTabs();
+        else if (selected == 3) createTab();
+        else if (selected == 4) showBookmarks();
+        else if (selected == 5) addCurrentBookmark();
+        else if (selected == 6) showHistory();
+        else if (selected == 7) {
+            if (currentUrl.length() > 0) loadUrl(currentUrl, false);
+        } else if (selected == 8) navigateHistory(false);
+        else if (selected == 9) toggleDataSaver();
+        else if (selected == 10) showSettings();
+        else if (selected == 11) showPageInformation();
+        else if (selected == 12) showDiagnostics();
+        else if (selected == 13) midlet.exit();
+        else Display.getDisplay(midlet).setCurrent(this);
+    }
+
+    private void showSettings() {
+        chooser = new List("Settings", List.IMPLICIT);
+        chooser.append(dataSaverEnabled ? "Data Saver: On" : "Data Saver: Off", null);
+        chooser.append("Gateway diagnostics", null);
+        chooser.append("About Netormium", null);
+        chooser.addCommand(new Command("Back", Command.BACK, 1));
+        chooser.setCommandListener(this);
+        Display.getDisplay(midlet).setCurrent(chooser);
+    }
+
+    private void toggleDataSaver() {
+        dataSaverEnabled = !dataSaverEnabled;
+        preferences.saveDataSaver(dataSaverEnabled);
+        if (currentUrl.length() > 0) loadUrl(currentUrl, false);
+        else {
+            status = dataSaverEnabled ? "Data Saver enabled" : "Data Saver disabled";
+            repaint();
+        }
+    }
+
+    private void showAbout() {
+        Alert alert = new Alert("About Netormium",
+            "Netormium\nChromium-assisted J2ME browser\nA lightweight gateway-powered web experience.",
+            null, AlertType.INFO);
+        alert.setTimeout(Alert.FOREVER);
+        Display.getDisplay(midlet).setCurrent(alert, this);
+    }
+
+    private void showPageInformation() {
+        StringBuffer info = new StringBuffer();
+        info.append("Title: ").append(pageTitle == null ? "" : pageTitle).append("\n");
+        info.append("Address: ").append(currentUrl.length() == 0 ? "Start page" : currentUrl).append("\n");
+        info.append("Protocol: ");
+        if (currentUrl.startsWith("https://")) info.append("HTTPS");
+        else if (currentUrl.startsWith("http://")) info.append("HTTP");
+        else info.append("Local");
+        info.append("\nTabs: ").append(tabs.size());
+        info.append("\nData Saver: ").append(dataSaverEnabled ? "On" : "Off");
+        Alert alert = new Alert("Page Information", info.toString(), null, AlertType.INFO);
+        alert.setTimeout(Alert.FOREVER);
+        Display.getDisplay(midlet).setCurrent(alert, this);
     }
 
     private void postUi(final int token, final String expectedSessionId, final Runnable action) {
