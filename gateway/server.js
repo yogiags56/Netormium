@@ -16,7 +16,7 @@ const viewportLimits = require('./viewport-limits');
 const sessionProtocol = require('./session-protocol');
 const GATEWAY_VERSION = require('./package.json').version;
 
-const HOST = process.env.HOST || '127.0.0.1';
+const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT || 8787);
 const MAX_URL_LENGTH = 4096;
 const NAV_TIMEOUT = 20000;
