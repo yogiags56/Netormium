@@ -31,6 +31,7 @@ public final class InteractiveGateway {
     }
 
     public void configureBaseUrl(String value) {
+        baseUrl = "";
         if (value == null) return;
         String candidate = value.trim();
         while (candidate.endsWith("/")) {
