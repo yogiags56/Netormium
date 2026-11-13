@@ -488,7 +488,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             - new AdaptiveLayout(new ScreenMetrics(getWidth(), getHeight())).getToolbarHeight() - 6));
         new Thread(new Runnable() {
             public void run() {
-                byte[] png = interactive.snapshot(id, offset);
+                final byte[] png = interactive.snapshot(id, offset);
                 if (token != requestToken || !id.equals(sessionId)) return;
                 if (png == null) {
                     final String error = interactive.getLastTransportError();
