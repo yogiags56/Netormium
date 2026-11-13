@@ -1,4 +1,5 @@
 ## 1.0.0-rc21 — MIDlet lifecycle and UI-thread hardening
+- Correct the repository README release heading and replace the obsolete NTM/1-only protocol note with the implemented NTM/2 session API reference.
 - Align the ECJ acquisition launch probe with the executable batch entry point used by the Ant build and toolchain doctor (`org.eclipse.jdt.internal.compiler.batch.Main`).
 - Route navigation, snapshot, tap, text-input, keypad and diagnostics results through MIDP Display.callSerially before mutating Canvas state or Images.
 - Recreate tab sessions from saved URLs instead of trusting in-memory Gateway session identifiers.
