@@ -1,6 +1,6 @@
 # Netormium 1.0.0-rc21
 
-Netormium is a J2ME browser inspired by Opera Mini 4.3. It uses a lightweight
+Netormium is a J2ME browser inspired by Opera Mini 4.5. It uses a lightweight
 Java ME MIDlet on feature phones and a remote Chromium/Playwright gateway to
 process modern web pages.
 
