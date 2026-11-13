@@ -78,6 +78,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private boolean fullScreenEnabled = false;
     private boolean loadImagesEnabled = true;
     private boolean mobileViewEnabled = false;
+    private boolean restoreLastPageEnabled = false;
     private final Command newTabCommand = new Command("New Tab", Command.SCREEN, 8);
     private final Command tabsCommand = new Command("Tabs", Command.SCREEN, 9);
     private final Command nextTabCommand = new Command("Next Tab", Command.SCREEN, 10);
@@ -114,6 +115,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         fullScreenEnabled = preferences.loadFullScreen();
         loadImagesEnabled = preferences.loadImages();
         mobileViewEnabled = preferences.loadMobileView();
+        restoreLastPageEnabled = preferences.loadRestoreLastPage();
         ThemeManager.setFontSize(fontSize);
         setFullScreenMode(fullScreenEnabled);
         addCommand(openCommand);
@@ -262,8 +264,9 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                         else if (selected == 2) toggleFullScreen();
                         else if (selected == 3) toggleLoadImages();
                         else if (selected == 4) toggleMobileView();
-                        else if (selected == 5) showGatewaySettings();
-                        else if (selected == 6) showDiagnostics();
+                        else if (selected == 5) toggleRestoreLastPage();
+                        else if (selected == 6) showGatewaySettings();
+                        else if (selected == 7) showDiagnostics();
                         else showAbout();
                         return;
                     } else if ("Speed Dial".equals(title) && selected < speedDialUrls.length)
@@ -357,6 +360,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         chooser.append(fullScreenEnabled ? "Full screen: On" : "Full screen: Off", null);
         chooser.append(loadImagesEnabled ? "Load Images: On" : "Load Images: Off", null);
         chooser.append(mobileViewEnabled ? "Mobile View: On" : "Mobile View: Off", null);
+        chooser.append(restoreLastPageEnabled ? "Restore Last Page: On" : "Restore Last Page: Off", null);
         chooser.append("Gateway address", null);
         chooser.append("Gateway diagnostics", null);
         chooser.append("About Netormium", null);
@@ -379,6 +383,13 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         gatewayBox.addCommand(new Command("Cancel", Command.CANCEL, 2));
         gatewayBox.setCommandListener(this);
         Display.getDisplay(midlet).setCurrent(gatewayBox);
+    }
+
+    private void toggleRestoreLastPage() {
+        restoreLastPageEnabled = !restoreLastPageEnabled;
+        preferences.saveRestoreLastPage(restoreLastPageEnabled);
+        status = restoreLastPageEnabled ? "Last page will restore at startup" : "Start Page will open at startup";
+        showSettings();
     }
 
     private void toggleLoadImages() {
@@ -463,7 +474,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         // Restore the URL and create a fresh session instead of trusting a persisted session ID.
         sessionId = "";
         tabs.setCurrentSessionId("");
-        if (currentUrl.length() > 0) loadUrl(currentUrl, false);
+        if (currentUrl.length() > 0 && restoreLastPageEnabled) loadUrl(currentUrl, false);
         else showHome();
     }
 
