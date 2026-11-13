@@ -1,3 +1,10 @@
+## 1.0.0-rc21 — MIDlet lifecycle and UI-thread hardening
+- Route navigation, snapshot, tap, text-input, keypad and diagnostics results through MIDP Display.callSerially before mutating Canvas state or Images.
+- Recreate tab sessions from saved URLs instead of trusting in-memory Gateway session identifiers.
+- Close old Chromium sessions on tab switches and new-tab creation; add an explicit MIDlet shutdown hook to close the active session.
+- Keep RMS tab state free of remote session IDs and bound persistent history storage.
+- Align Gateway package metadata, health response, diagnostics and Java ME User-Agent values to RC21.
+
 ## 1.0.0-rc20 — Gateway network policy hardening
 - Added a dedicated Gateway host policy for HTTP(S)-only destinations.
 - Added IPv4 and IPv6 public-address classification, including IPv4-mapped IPv6 and special-use ranges.
