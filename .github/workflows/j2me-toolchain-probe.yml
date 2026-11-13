@@ -77,9 +77,21 @@ jobs:
           -dontoptimize
           -dontobfuscate
           -microedition
+          -verbose
           -keep class ** { *; }
           EOF
-          "$PROGUARD_DIR/proguard.sh" @toolchain/netormium.pro
+          echo "ProGuard executable: $PROGUARD_DIR/proguard.sh"
+          echo "Java runtime: $(java -version 2>&1 | head -n 1)"
+          set +e
+          "$PROGUARD_DIR/proguard.sh" @toolchain/netormium.pro 2>&1 | tee toolchain/proguard.log
+          PROGUARD_STATUS=${PIPESTATUS[0]}
+          set -e
+          echo "ProGuard exit code: $PROGUARD_STATUS"
+          if [ "$PROGUARD_STATUS" -ne 0 ]; then
+            echo "ProGuard diagnostics (last 200 lines):"
+            tail -n 200 toolchain/proguard.log
+            exit "$PROGUARD_STATUS"
+          fi
           test -s dist/Netormium.jar
           mkdir -p build/preverified
           (cd build/preverified && jar xf ../../dist/Netormium.jar)
@@ -115,6 +127,8 @@ jobs:
           path: |
             toolchain/ecj-help.txt
             toolchain/compiled-classes.txt
+            toolchain/proguard.log
+            toolchain/netormium.pro
             dist/Netormium.jar
             dist/Netormium.jad
           if-no-files-found: warn
