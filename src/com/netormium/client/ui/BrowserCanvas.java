@@ -1086,7 +1086,16 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             logoY + logoSize + title.getHeight() + 5,
             Graphics.HCENTER | Graphics.TOP);
 
-        int sectionY = logoY + logoSize + title.getHeight() + body.getHeight() + 15;
+        int searchY = logoY + logoSize + title.getHeight() + body.getHeight() + 13;
+        int searchHeight = Math.max(25, body.getHeight() + 12);
+        g.setColor(ThemeManager.HEADER_BACKGROUND);
+        g.fillRoundRect(5, searchY, width - 10, searchHeight, 7, 7);
+        g.setColor(ThemeManager.BORDER);
+        g.drawRoundRect(5, searchY, width - 11, searchHeight, 7, 7);
+        g.setColor(ThemeManager.MUTED);
+        g.drawString("Search or enter address", 12, searchY + 5, Graphics.LEFT | Graphics.TOP);
+
+        int sectionY = searchY + searchHeight + 10;
         g.setColor(ThemeManager.HEADER_FOREGROUND);
         g.drawString("Speed Dial", 5, sectionY, Graphics.LEFT | Graphics.TOP);
         sectionY += body.getHeight() + 5;
@@ -1136,7 +1145,10 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         Font body = ThemeManager.getBodyFont(metrics);
         Font title = ThemeManager.getTitleFont();
         int logoSize = Math.min(42, Math.max(30, getWidth() / 6));
-        int sectionY = top + 8 + logoSize + title.getHeight() + body.getHeight() + 15;
+        int searchY = top + 8 + logoSize + title.getHeight() + body.getHeight() + 13;
+        int searchHeight = Math.max(25, body.getHeight() + 12);
+        if (y >= searchY && y < searchY + searchHeight && x >= 5 && x < getWidth() - 5) return -2;
+        int sectionY = searchY + searchHeight + 10;
         sectionY += body.getHeight() + 5;
         int columns = getWidth() >= 220 ? 2 : 1;
         int gap = 5;
@@ -1160,6 +1172,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         int bottom = getHeight() - layout.getToolbarHeight() - 2;
         if (y >= top && y < bottom && currentUrl.length() == 0) {
             int dial = speedDialIndexAt(x, y, top, bottom);
+            if (dial == -2) { showAddressBox(); return; }
             SpeedDialStore.Entry[] items = speedDial.all();
             if (dial >= 0 && dial < items.length) loadUrl(items[dial].url, true);
         } else if (y >= top && y < bottom && sessionId.length() > 0) {
