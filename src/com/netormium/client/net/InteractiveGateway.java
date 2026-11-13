@@ -7,7 +7,7 @@ import javax.microedition.io.HttpConnection;
 
 /** NTM/2 persistent browser session client for MIDP 2.0 / CLDC 1.1. */
 public final class InteractiveGateway {
-    private String baseUrl = "http://127.0.0.1:8787";
+    private String baseUrl = "";
     private static final int MAX_META = 60000;
     private static final int MAX_PNG = 180000;
     private volatile String lastTransportError = "";
@@ -36,9 +36,21 @@ public final class InteractiveGateway {
         while (candidate.endsWith("/")) {
             candidate = candidate.substring(0, candidate.length() - 1);
         }
-        if (candidate.startsWith("http://") || candidate.startsWith("https://")) {
+        if (isValidBaseUrl(candidate)) {
             baseUrl = candidate;
         }
+    }
+
+    private boolean isValidBaseUrl(String value) {
+        if (value == null || value.length() == 0 || value.indexOf(' ') >= 0) return false;
+        String lower = value.toLowerCase();
+        if (!lower.startsWith("http://") && !lower.startsWith("https://")) return false;
+        int schemeEnd = value.indexOf("://") + 3;
+        if (schemeEnd >= value.length()) return false;
+        String host = value.substring(schemeEnd);
+        int slash = host.indexOf('/');
+        if (slash >= 0) host = host.substring(0, slash);
+        return host.length() > 0 && host.indexOf('@') < 0;
     }
 
     public String getBaseUrl() {
@@ -197,6 +209,10 @@ public final class InteractiveGateway {
     private byte[] requestBytesOnce(String path, int maxBytes) {
         HttpConnection connection = null;
         InputStream input = null;
+        if (baseUrl.length() == 0) {
+            lastTransportError = "Gateway URL is not configured. Set Netormium-Gateway-URL in the JAD.";
+            return null;
+        }
         try {
             connection = (HttpConnection) Connector.open(baseUrl + path, Connector.READ, true);
             connection.setRequestMethod(HttpConnection.GET);
