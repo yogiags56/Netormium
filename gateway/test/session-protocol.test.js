@@ -52,3 +52,24 @@ test('bounds interactive element count and metadata fields', () => {
   assert.ok(parsed.find(row => row[0] === 'ELEMENT')[7].length <=
     require('../metadata-limits').MAX_ELEMENT_LABEL_CHARS * 3);
 });
+
+
+test('bounds page metadata and normalizes invalid element coordinates and kinds', () => {
+  const raw = protocol.metadataResponse({ id: 'safe-id' }, {
+    url: 'u'.repeat(1200),
+    title: 't'.repeat(200),
+    text: 'x'.repeat(7000),
+    elements: [{
+      kind: 'script', x: 'NaN', y: Infinity, w: -5, h: 9999,
+      label: 'link', href: '', inputType: '', focused: false
+    }]
+  });
+  const parsed = records(raw);
+  assert.equal(decodeURIComponent(parsed.find(row => row[0] === 'URL')[1]).length, 1024);
+  assert.equal(decodeURIComponent(parsed.find(row => row[0] === 'TITLE')[1]).length, 100);
+  assert.equal(decodeURIComponent(parsed.find(row => row[0] === 'TEXT')[1]).length, 6000);
+  assert.deepEqual(parsed.find(row => row[0] === 'ELEMENT').slice(0, 7),
+    ['ELEMENT', '1', 'button', '0', '0', '0', '960']);
+  assert.equal(raw.indexOf('NaN'), -1);
+  assert.equal(raw.indexOf('Infinity'), -1);
+});
