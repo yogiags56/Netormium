@@ -232,11 +232,10 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         currentUrl = tab.url == null ? "" : tab.url;
         pageTitle = tab.title == null ? "New Tab" : tab.title;
         scrollY = tab.scrollY;
+        // Recreate remote Chromium state from the URL; tab session IDs are transient.
+        tabs.setCurrentSessionId("");
         if (tab.url == null || tab.url.length() == 0) showHome();
-        else if (tab.sessionId != null && tab.sessionId.length() > 0) {
-            sessionId = tab.sessionId;
-            restoreActiveTab();
-        } else loadUrl(tab.url, false);
+        else loadUrl(tab.url, false);
         persistState();
         status = "Tab " + (index + 1) + "/" + tabs.size();
         repaint();
