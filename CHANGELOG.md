@@ -1,3 +1,10 @@
+## 1.0.0-rc20 — Repository integration and release identity alignment
+- Imported the 68-file RC20 source baseline into the repository root.
+- Aligned Gateway package metadata, server banner, health response, Java ME User-Agent values, and release consistency checks to RC20.
+- Retained the original RC20 archive under release/ for provenance.
+- Documented the Android browser-only development workflow; no Termux or PC is required.
+- Java ME JAR/JAD output remains gated on a genuine CLDC/MIDP toolchain and preverifier.
+
 # Changelog
 
 ## 1.0.0-rc18
