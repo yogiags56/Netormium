@@ -331,17 +331,21 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             public void run() {
                 com.netormium.client.net.InteractiveGateway.Page result = interactive.type(id, value);
                 if (token != requestToken || !id.equals(sessionId)) return;
-                if (result.error != null && result.error.length() > 0) {
-                    if (!recoverExpiredSession(id, token, result.error)) status = result.error;
-                } else {
-                    pageTitle = result.title;
-                    pageText = result.text;
-                    interactiveElements = result.elements;
-                    inputFocused = hasFocusedInput();
-                    status = "Text sent";
-                    refreshSessionSnapshot(token, scrollY);
-                }
-                repaint();
+                postUi(token, id, new Runnable() {
+                    public void run() {
+                        if (result.error != null && result.error.length() > 0) {
+                            if (!recoverExpiredSession(id, token, result.error)) status = result.error;
+                        } else {
+                            pageTitle = result.title;
+                            pageText = result.text;
+                            interactiveElements = result.elements;
+                            inputFocused = hasFocusedInput();
+                            status = "Text sent";
+                            refreshSessionSnapshot(token, scrollY);
+                        }
+                        repaint();
+                    }
+                });
             }
         }).start();
     }
@@ -515,21 +519,28 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             public void run() {
                 com.netormium.client.net.InteractiveGateway.Page result = interactive.tap(id, x, y);
                 if (token != requestToken || !id.equals(sessionId)) return;
-                if (result.error != null && result.error.length() > 0) {
-                    if (!recoverExpiredSession(id, token, result.error)) status = result.error;
-                } else {
-                    currentUrl = result.url;
-                    pageTitle = result.title;
-                    tabs.updateCurrent(currentUrl, pageTitle, scrollY);
-                    tabs.setCurrentSessionId(sessionId);
-                    persistState();
-                    pageText = result.text;
-                    interactiveElements = result.elements;
-                    inputFocused = hasFocusedInput();
-                    if (currentUrl != null && currentUrl.length() > 0) { history.visit(currentUrl); historyStore.save(history); }
-                    refreshSessionSnapshot(token, scrollY);
-                }
-                repaint();
+                postUi(token, id, new Runnable() {
+                    public void run() {
+                        if (result.error != null && result.error.length() > 0) {
+                            if (!recoverExpiredSession(id, token, result.error)) status = result.error;
+                        } else {
+                            currentUrl = result.url;
+                            pageTitle = result.title;
+                            tabs.updateCurrent(currentUrl, pageTitle, scrollY);
+                            tabs.setCurrentSessionId(sessionId);
+                            persistState();
+                            pageText = result.text;
+                            interactiveElements = result.elements;
+                            inputFocused = hasFocusedInput();
+                            if (currentUrl != null && currentUrl.length() > 0) {
+                                history.visit(currentUrl);
+                                historyStore.save(history);
+                            }
+                            refreshSessionSnapshot(token, scrollY);
+                        }
+                        repaint();
+                    }
+                });
             }
         }).start();
     }
@@ -585,21 +596,25 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             public void run() {
                 com.netormium.client.net.InteractiveGateway.Page result = interactive.key(id, key);
                 if (token != requestToken || !id.equals(sessionId)) return;
-                if (result.error != null && result.error.length() > 0) {
-                    if (!recoverExpiredSession(id, token, result.error)) status = result.error;
-                    repaint();
-                    return;
-                }
-                currentUrl = result.url;
-                pageTitle = result.title;
-                tabs.updateCurrent(currentUrl, pageTitle, scrollY);
-                tabs.setCurrentSessionId(sessionId);
-                persistState();
-                pageText = result.text;
-                interactiveElements = result.elements;
-                status = result.error.length() == 0 ? "Key: " + key : result.error;
-                refreshSessionSnapshot(token, scrollY);
-                repaint();
+                postUi(token, id, new Runnable() {
+                    public void run() {
+                        if (result.error != null && result.error.length() > 0) {
+                            if (!recoverExpiredSession(id, token, result.error)) status = result.error;
+                            repaint();
+                            return;
+                        }
+                        currentUrl = result.url;
+                        pageTitle = result.title;
+                        tabs.updateCurrent(currentUrl, pageTitle, scrollY);
+                        tabs.setCurrentSessionId(sessionId);
+                        persistState();
+                        pageText = result.text;
+                        interactiveElements = result.elements;
+                        status = "Key: " + key;
+                        refreshSessionSnapshot(token, scrollY);
+                        repaint();
+                    }
+                });
             }
         }).start();
     }
