@@ -79,6 +79,55 @@ jobs:
           test -s build/netormium-preverified.jar
           jar tf build/netormium-preverified.jar | grep -Fx 'com/netormium/client/NetormiumMIDlet.class'
           echo "ProGuard Java ME preverification completed."
+      - name: Preverify and package MIDlet with ProGuard
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build dist
+          curl --fail --location --retry 3 --output toolchain/proguard-7.10.0.zip https://github.com/Guardsquare/proguard/releases/download/v7.10.0/proguard-7.10.0.zip
+          echo "5aa88c434766a057a2ead3412acc01022bb444f9f1bfbae690a1d48b2006b242  toolchain/proguard-7.10.0.zip" | sha256sum --check
+          unzip -q toolchain/proguard-7.10.0.zip -d toolchain/proguard
+          PROGUARD_DIR="$(find toolchain/proguard -type f -name proguard.sh -print -quit | xargs -r dirname)"
+          test -n "$PROGUARD_DIR"
+          jar --create --file build/Netormium-unverified.jar -C build/classes .
+          cat > toolchain/netormium.pro <<'EOF'
+          -injars build/Netormium-unverified.jar
+          -outjars dist/Netormium.jar
+          -libraryjars toolchain/cldcapi11.jar
+          -libraryjars toolchain/midpapi20.jar
+          -dontshrink
+          -dontoptimize
+          -dontobfuscate
+          -microedition
+          -keep public class com.netormium.client.NetormiumMIDlet {
+              public <init>();
+              protected void startApp() throws javax.microedition.midlet.MIDletStateChangeException;
+              protected void pauseApp();
+              protected void destroyApp(boolean);
+          }
+          EOF
+          "$PROGUARD_DIR/proguard.sh" @toolchain/netormium.pro
+          test -s dist/Netormium.jar
+          jar tf dist/Netormium.jar | grep -Fx 'com/netormium/client/NetormiumMIDlet.class'
+          if jar tf dist/Netormium.jar | grep -q '^javax/microedition/'; then
+            echo "Java ME API classes must not be bundled in MIDlet JAR" >&2
+            exit 1
+          fi
+          cp resources/Netormium.jad.example dist/Netormium.jad
+          JAR_SIZE="$(wc -c < dist/Netormium.jar | tr -d ' ')"
+          sed -i "s/^MIDlet-Jar-Size: .*/MIDlet-Jar-Size: $JAR_SIZE/" dist/Netormium.jad
+          node gateway/scripts/check-midlet-package.js dist/Netormium.jar dist/Netormium.jad
+
+      - name: Upload Alpha JAR and JAD
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netormium-alpha-midlet-package
+          path: |
+            dist/Netormium.jar
+            dist/Netormium.jad
+          if-no-files-found: error
+
       - name: Archive compile-only diagnostic
         if: always()
         uses: actions/upload-artifact@v4
