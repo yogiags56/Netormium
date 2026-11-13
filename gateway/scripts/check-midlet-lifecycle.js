@@ -125,6 +125,11 @@ const checks = [
     canvas.includes('toggleRestoreLastPage()') &&
     canvas.includes('else if (selected == 6) showGatewaySettings();') &&
     canvas.includes('else if (selected == 7) showDiagnostics();')],
+  ['Start Page renders a touchable address/search field and aligns Speed Dial hit testing',
+    canvas.includes('Search or enter address') &&
+    canvas.includes('g.fillRoundRect(5, searchY, width - 10, searchHeight, 7, 7)') &&
+    canvas.includes('if (dial == -2) { showAddressBox(); return; }') &&
+    canvas.includes('int sectionY = searchY + searchHeight + 10;')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&
