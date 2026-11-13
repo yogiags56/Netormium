@@ -76,6 +76,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private boolean dataSaverEnabled = true;
     private int fontSize = 1;
     private boolean fullScreenEnabled = false;
+    private boolean loadImagesEnabled = true;
+    private boolean mobileViewEnabled = false;
     private final Command newTabCommand = new Command("New Tab", Command.SCREEN, 8);
     private final Command tabsCommand = new Command("Tabs", Command.SCREEN, 9);
     private final Command nextTabCommand = new Command("Next Tab", Command.SCREEN, 10);
@@ -110,6 +112,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         dataSaverEnabled = preferences.loadDataSaver(true);
         fontSize = preferences.loadFontSize();
         fullScreenEnabled = preferences.loadFullScreen();
+        loadImagesEnabled = preferences.loadImages();
+        mobileViewEnabled = preferences.loadMobileView();
         ThemeManager.setFontSize(fontSize);
         setFullScreenMode(fullScreenEnabled);
         addCommand(openCommand);
@@ -256,8 +260,10 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                         if (selected == 0) toggleDataSaver();
                         else if (selected == 1) cycleFontSize();
                         else if (selected == 2) toggleFullScreen();
-                        else if (selected == 3) showGatewaySettings();
-                        else if (selected == 4) showDiagnostics();
+                        else if (selected == 3) toggleLoadImages();
+                        else if (selected == 4) toggleMobileView();
+                        else if (selected == 5) showGatewaySettings();
+                        else if (selected == 6) showDiagnostics();
                         else showAbout();
                         return;
                     } else if ("Speed Dial".equals(title) && selected < speedDialUrls.length)
@@ -349,6 +355,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         chooser.append(dataSaverEnabled ? "Data Saver: On" : "Data Saver: Off", null);
         chooser.append("Text size: " + fontSizeLabel(), null);
         chooser.append(fullScreenEnabled ? "Full screen: On" : "Full screen: Off", null);
+        chooser.append(loadImagesEnabled ? "Load Images: On" : "Load Images: Off", null);
+        chooser.append(mobileViewEnabled ? "Mobile View: On" : "Mobile View: Off", null);
         chooser.append("Gateway address", null);
         chooser.append("Gateway diagnostics", null);
         chooser.append("About Netormium", null);
@@ -371,6 +379,20 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         gatewayBox.addCommand(new Command("Cancel", Command.CANCEL, 2));
         gatewayBox.setCommandListener(this);
         Display.getDisplay(midlet).setCurrent(gatewayBox);
+    }
+
+    private void toggleLoadImages() {
+        loadImagesEnabled = !loadImagesEnabled;
+        preferences.saveLoadImages(loadImagesEnabled);
+        status = loadImagesEnabled ? "Images enabled for next page" : "Images disabled for next page";
+        showSettings();
+    }
+
+    private void toggleMobileView() {
+        mobileViewEnabled = !mobileViewEnabled;
+        preferences.saveMobileView(mobileViewEnabled);
+        status = mobileViewEnabled ? "Mobile View enabled for next page" : "Mobile View disabled for next page";
+        showSettings();
     }
 
     private String fontSizeLabel() { if (fontSize == 0) return "Small"; if (fontSize == 2) return "Large"; return "Normal"; }
@@ -688,12 +710,14 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         final int viewportHeight = Math.max(128, Math.min(960, getHeight() -
             layout.getAddressBarHeight() - layout.getToolbarHeight() - 6));
         final boolean useDataSaver = dataSaverEnabled;
+        final boolean useImages = loadImagesEnabled;
+        final boolean useMobileView = mobileViewEnabled;
         repaint();
 
         Thread worker = new Thread(new Runnable() {
             public void run() {
                 final com.netormium.client.net.InteractiveGateway.Page result =
-                    interactive.open(url, viewportWidth, viewportHeight, useDataSaver);
+                    interactive.open(url, viewportWidth, viewportHeight, useDataSaver, useImages, useMobileView);
                 if (token != requestToken) {
                     if (result.sessionId.length() > 0) interactive.close(result.sessionId);
                     return;
