@@ -12,7 +12,8 @@
     "acquire:ecj": "node scripts/acquire-ecj.js",
     "discover:j2me-sdk": "node scripts/discover-j2me-sdk.js",
     "check:midlet-package": "node scripts/check-midlet-package.js",
-    "configure:j2me-toolchain": "node scripts/configure-local-toolchain.js"
+    "configure:j2me-toolchain": "node scripts/configure-local-toolchain.js",
+    "check:midlet-lifecycle": "node scripts/check-midlet-lifecycle.js"
   },
   "dependencies": {
     "playwright": "^1.56.1"
