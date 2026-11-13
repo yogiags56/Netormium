@@ -10,6 +10,7 @@
 - Capture viewport dimensions before starting the navigation worker; the worker no longer reads Canvas geometry.
 - Serialize tap, text-entry and keypad mutations so overlapping requests cannot race on one Chromium page.
 - Enforce declared Content-Length and streamed byte ceilings in all Java ME HTTP loaders; handle zero-byte reads without stalling the copy loop.
+- Keep response-buffer initial allocations at 4 KiB to reduce memory pressure on older handsets.
 - Document MIDP 2.0 timeout limitations instead of promising a portable hard network timeout.
 - Add downloadable CI diagnostics and install the Gateway's Playwright dependency before test execution.
 
