@@ -5,7 +5,7 @@ import javax.microedition.rms.RecordStore;
 /** Persistent MIDlet preferences. Version 2 extends the original Data Saver record. */
 public final class BrowserPreferences {
     private static final String STORE = "NetormiumPrefs";
-    private static final int VERSION = 3;
+    private static final int VERSION = 4;
     private static final int DEFAULT_FONT_SIZE = 1;
 
     private byte[] read() {
@@ -35,6 +35,7 @@ public final class BrowserPreferences {
         byte full = 0;
         byte images = 1;
         byte mobile = 0;
+        byte startup = 0;
         if (old != null && old.length >= 2) {
             saver = old[1];
             if (old.length >= 4 && (old[0] & 255) >= 2) {
@@ -45,9 +46,10 @@ public final class BrowserPreferences {
                 images = old[4];
                 mobile = old[5];
             }
+            if (old.length >= 7 && (old[0] & 255) >= 4) startup = old[6];
         }
         if (font < 0 || font > 2) font = DEFAULT_FONT_SIZE;
-        return new byte[] {(byte) VERSION, saver, font, full, images, mobile};
+        return new byte[] {(byte) VERSION, saver, font, full, images, mobile, startup};
     }
 
     public boolean loadDataSaver(boolean fallback) {
@@ -87,6 +89,14 @@ public final class BrowserPreferences {
     public void saveMobileView(boolean enabled) {
         byte[] d = normalized();
         d[5] = (byte) (enabled ? 1 : 0);
+        write(d);
+    }
+
+    public boolean loadRestoreLastPage() { return normalized()[6] != 0; }
+
+    public void saveRestoreLastPage(boolean enabled) {
+        byte[] d = normalized();
+        d[6] = (byte) (enabled ? 1 : 0);
         write(d);
     }
 
