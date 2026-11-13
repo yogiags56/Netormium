@@ -66,6 +66,19 @@ const checks = [
     canvas.includes('loadUrl(items[selected - 1].url, true)') &&
     canvas.includes('loadUrl(items[dial].url, true)') &&
     canvas.includes('renameSpeedDialCommand') && canvas.includes('deleteSpeedDialCommand')],
+  ['preferences persist font size and full-screen mode with backward-compatible Data Saver',
+    read('src/com/netormium/client/util/BrowserPreferences.java').includes('public int loadFontSize()') &&
+    read('src/com/netormium/client/util/BrowserPreferences.java').includes('public boolean loadFullScreen()') &&
+    read('src/com/netormium/client/util/BrowserPreferences.java').includes('private static final int VERSION = 2') &&
+    canvas.includes('preferences.saveFontSize(fontSize)') &&
+    canvas.includes('preferences.saveFullScreen(fullScreenEnabled)') &&
+    canvas.includes('ThemeManager.setFontSize(fontSize)') &&
+    canvas.includes('setFullScreenMode(fullScreenEnabled)')],
+  ['Settings menu exposes functional text size and full-screen controls',
+    canvas.includes('chooser.append("Text size: " + fontSizeLabel(), null)') &&
+    canvas.includes('chooser.append(fullScreenEnabled ? "Full screen: On" : "Full screen: Off", null)') &&
+    canvas.includes('else if (selected == 1) cycleFontSize();') &&
+    canvas.includes('else if (selected == 2) toggleFullScreen();')],
   ['Speed Dial supports persistent adjacent reordering',
     read('src/com/netormium/client/util/SpeedDialStore.java').includes('public boolean move(String url, int offset)') &&
     read('src/com/netormium/client/util/SpeedDialStore.java').includes('int target = index + offset;') &&
