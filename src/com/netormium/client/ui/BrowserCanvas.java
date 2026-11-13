@@ -211,9 +211,14 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     }
 
     private void createTab() {
+        if (tabs.size() >= TabManager.MAX_TABS) {
+            status = "Maximum 6 tabs";
+            repaint();
+            return;
+        }
         stopLoading();
         saveCurrentTab();
-        sessionId = "";
+        closeSession();
         int index = tabs.add("", "New Tab");
         if (index < 0) { status = "Maximum 6 tabs"; repaint(); return; }
         showHome();
@@ -226,6 +231,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         if (index == tabs.activeIndex()) return;
         stopLoading();
         saveCurrentTab();
+        closeSession();
         if (!tabs.select(index)) return;
         TabManager.Tab tab = tabs.current();
         sessionId = "";
@@ -316,6 +322,13 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     }
 
     public void persistOnPause() {
+        persistState();
+        preferences.saveDataSaver(dataSaverEnabled);
+    }
+
+    public void shutdown() {
+        stopLoading();
+        closeSession();
         persistState();
         preferences.saveDataSaver(dataSaverEnabled);
     }
