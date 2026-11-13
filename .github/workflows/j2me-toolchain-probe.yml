@@ -92,6 +92,7 @@ jobs:
             tail -n 200 toolchain/proguard.log
             exit "$PROGUARD_STATUS"
           fi
+          set -x
           test -s dist/Netormium.jar
           mkdir -p build/preverified
           (cd build/preverified && jar xf ../../dist/Netormium.jar)
