@@ -20,8 +20,7 @@ public final class NetormiumMIDlet extends MIDlet {
 
     public void destroyApp(boolean unconditional) {
         if (browser != null) {
-            browser.persistOnPause();
-            browser.stopLoading();
+            browser.shutdown();
         }
     }
 
