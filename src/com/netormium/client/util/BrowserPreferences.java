@@ -5,7 +5,7 @@ import javax.microedition.rms.RecordStore;
 /** Persistent MIDlet preferences. Version 2 extends the original Data Saver record. */
 public final class BrowserPreferences {
     private static final String STORE = "NetormiumPrefs";
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
     private static final int DEFAULT_FONT_SIZE = 1;
 
     private byte[] read() {
@@ -33,15 +33,21 @@ public final class BrowserPreferences {
         byte saver = 1;
         byte font = DEFAULT_FONT_SIZE;
         byte full = 0;
+        byte images = 1;
+        byte mobile = 0;
         if (old != null && old.length >= 2) {
             saver = old[1];
             if (old.length >= 4 && (old[0] & 255) >= 2) {
                 font = old[2];
                 full = old[3];
             }
+            if (old.length >= 6 && (old[0] & 255) >= 3) {
+                images = old[4];
+                mobile = old[5];
+            }
         }
         if (font < 0 || font > 2) font = DEFAULT_FONT_SIZE;
-        return new byte[] {(byte) VERSION, saver, font, full};
+        return new byte[] {(byte) VERSION, saver, font, full, images, mobile};
     }
 
     public boolean loadDataSaver(boolean fallback) {
@@ -65,6 +71,22 @@ public final class BrowserPreferences {
         if (size < 0 || size > 2) return;
         byte[] d = normalized();
         d[2] = (byte) size;
+        write(d);
+    }
+
+    public boolean loadImages() { return normalized()[4] != 0; }
+
+    public void saveLoadImages(boolean enabled) {
+        byte[] d = normalized();
+        d[4] = (byte) (enabled ? 1 : 0);
+        write(d);
+    }
+
+    public boolean loadMobileView() { return normalized()[5] != 0; }
+
+    public void saveMobileView(boolean enabled) {
+        byte[] d = normalized();
+        d[5] = (byte) (enabled ? 1 : 0);
         write(d);
     }
 
