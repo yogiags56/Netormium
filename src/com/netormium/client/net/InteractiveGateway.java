@@ -216,7 +216,7 @@ public final class InteractiveGateway {
         try {
             connection = (HttpConnection) Connector.open(baseUrl + path, Connector.READ, true);
             connection.setRequestMethod(HttpConnection.GET);
-            connection.setRequestProperty("User-Agent", "Netormium/1.0-rc20 (Java ME)");
+            connection.setRequestProperty("User-Agent", "Netormium/1.0-rc21 (Java ME)");
             int code = connection.getResponseCode();
             if (code < 200 || code >= 300) {
                 lastTransportError = code == 404
