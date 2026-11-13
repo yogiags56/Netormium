@@ -54,6 +54,16 @@ public final class BrowserHistory {
         for (int i = start; i < values.length; i++) if (values[i] != null) entries[size++] = values[i];
         if (size > 0) index = Math.max(0, Math.min(size - 1, selected - start));
     }
+    public boolean removeAt(int position) {
+        if (position < 0 || position >= size) return false;
+        for (int i = position; i < size - 1; i++) entries[i] = entries[i + 1];
+        entries[--size] = null;
+        if (size == 0) index = -1;
+        else if (position < index) index--;
+        else if (position == index && index >= size) index = size - 1;
+        return true;
+    }
+
     public void clear() {
         for (int i = 0; i < size; i++) entries[i] = null;
         size = 0;
