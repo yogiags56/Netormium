@@ -1,0 +1,70 @@
+name: Netormium Java ME Toolchain Probe
+
+on:
+  push:
+    branches:
+      - "alpha/**"
+    paths:
+      - "src/**"
+      - ".github/workflows/j2me-toolchain-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-midlet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Download pinned Java ME API stubs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p toolchain
+          curl --fail --location --retry 3 --output toolchain/cldcapi11.jar https://repo.maven.apache.org/maven2/org/microemu/cldcapi11/2.0.4/cldcapi11-2.0.4.jar
+          curl --fail --location --retry 3 --output toolchain/midpapi20.jar https://repo.maven.apache.org/maven2/org/microemu/midpapi20/2.0.4/midpapi20-2.0.4.jar
+          jar tf toolchain/cldcapi11.jar | grep -Fx 'javax/microedition/io/Connector.class'
+          jar tf toolchain/midpapi20.jar | grep -Fx 'javax/microedition/midlet/MIDlet.class'
+          jar tf toolchain/midpapi20.jar | grep -Fx 'javax/microedition/lcdui/Canvas.class'
+
+      - name: Download and verify Eclipse ECJ 4.41
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p toolchain
+          curl --fail --location --retry 3 --output toolchain/ecj-4.41.jar https://download.eclipse.org/eclipse/downloads/drops4/R-4.41-202608281142/ecj-4.41.jar
+          echo "080bb403adb3b88b5b5f382388922425de5274f7729f0a94702f0e2a516c7d13c6740faab1cb20786b1dda0c5da933aa9b842f7c64867414ff75fa668ea06b09  toolchain/ecj-4.41.jar" | sha512sum --check
+          java -cp toolchain/ecj-4.41.jar org.eclipse.jdt.compiler.batch.BatchCompiler -help > toolchain/ecj-help.txt 2>&1
+          grep -E -- '-1\.3|--source' toolchain/ecj-help.txt
+
+      - name: Compile all MIDlet sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/classes
+          find src -name '*.java' -print0 | xargs -0 java -cp toolchain/ecj-4.41.jar org.eclipse.jdt.compiler.batch.BatchCompiler \
+            -1.3 -encoding UTF-8 \
+            -bootclasspath toolchain/cldcapi11.jar:toolchain/midpapi20.jar \
+            -d build/classes
+          test -n "$(find build/classes -name '*.class' -print -quit)"
+          find build/classes -name '*.class' | sort > toolchain/compiled-classes.txt
+          echo "Compiled class count: $(wc -l < toolchain/compiled-classes.txt)"
+
+      - name: Archive compile-only diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netormium-alpha-compile-probe
+          path: |
+            toolchain/ecj-help.txt
+            toolchain/compiled-classes.txt
+          if-no-files-found: warn
