@@ -24,5 +24,8 @@ jobs:
       - name: Check release identity
         working-directory: gateway
         run: node scripts/check-release.js
+      - name: Check MIDlet lifecycle
+        working-directory: gateway
+        run: node scripts/check-midlet-lifecycle.js
       - name: Check Ant project
         run: ant -projecthelp
