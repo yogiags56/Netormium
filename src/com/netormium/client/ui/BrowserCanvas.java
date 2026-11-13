@@ -40,6 +40,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private com.netormium.client.net.InteractiveGateway.Element[] interactiveElements =
         new com.netormium.client.net.InteractiveGateway.Element[0];
     private boolean inputFocused = false;
+    private boolean interactionBusy = false;
     private int selectedElement = -1;
     private TextBox inputBox;
     private final com.netormium.client.net.SnapshotLoader snapshotLoader = new com.netormium.client.net.SnapshotLoader();
@@ -340,6 +341,12 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             repaint();
             return;
         }
+        if (interactionBusy) {
+            status = "Please wait for the current page action";
+            repaint();
+            return;
+        }
+        interactionBusy = true;
         final String id = sessionId;
         final int token = requestToken;
         Display.getDisplay(midlet).setCurrent(this);
@@ -351,6 +358,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                 if (token != requestToken || !id.equals(sessionId)) return;
                 postUi(token, id, new Runnable() {
                     public void run() {
+                        interactionBusy = false;
                         if (result.error != null && result.error.length() > 0) {
                             if (!recoverExpiredSession(id, token, result.error)) status = result.error;
                         } else {
@@ -469,6 +477,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     }
 
     private void closeSession() {
+        interactionBusy = false;
         if (sessionId != null && sessionId.length() > 0) {
             String oldSession = sessionId;
             tabs.setCurrentSessionId("");
@@ -530,6 +539,12 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
 
     private void tapPage(final int x, final int y) {
         if (sessionId == null || sessionId.length() == 0) return;
+        if (interactionBusy) {
+            status = "Please wait for the current page action";
+            repaint();
+            return;
+        }
+        interactionBusy = true;
         final String id = sessionId;
         final int token = requestToken;
         status = "Activating...";
@@ -540,6 +555,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                 if (token != requestToken || !id.equals(sessionId)) return;
                 postUi(token, id, new Runnable() {
                     public void run() {
+                        interactionBusy = false;
                         if (result.error != null && result.error.length() > 0) {
                             if (!recoverExpiredSession(id, token, result.error)) status = result.error;
                         } else {
@@ -609,6 +625,12 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
 
     private void sendBrowserKey(final String key) {
         if (sessionId == null || sessionId.length() == 0) return;
+        if (interactionBusy) {
+            status = "Please wait for the current page action";
+            repaint();
+            return;
+        }
+        interactionBusy = true;
         final String id = sessionId;
         final int token = requestToken;
         new Thread(new Runnable() {
@@ -617,6 +639,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                 if (token != requestToken || !id.equals(sessionId)) return;
                 postUi(token, id, new Runnable() {
                     public void run() {
+                        interactionBusy = false;
                         if (result.error != null && result.error.length() > 0) {
                             if (!recoverExpiredSession(id, token, result.error)) status = result.error;
                             repaint();
@@ -652,6 +675,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     }
 
     public void stopLoading() {
+        interactionBusy = false;
         requestToken++;
         loading = false;
         interactive.cancelCurrentOpen();
