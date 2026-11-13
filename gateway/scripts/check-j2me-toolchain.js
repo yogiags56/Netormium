@@ -69,7 +69,7 @@ function commandVersion(command, args) {
   if (result.error) return { ok: false, output: result.error.message };
   return { ok: result.status === 0, output: `${result.stdout || ''}${result.stderr || ''}`.trim().split(/\r?\n/)[0] || `exit ${result.status}` };
 }
-const ECJ_MAIN_CLASS = 'org.eclipse.jdt.compiler.batch.BatchCompiler';
+const ECJ_MAIN_CLASS = 'org.eclipse.jdt.internal.compiler.batch.Main';
 
 function ecjProbeArguments(jarPath) {
   return ['-cp', jarPath, ECJ_MAIN_CLASS, '-help'];
