@@ -15,12 +15,23 @@ public final class ThemeManager {
     private ThemeManager() {
     }
 
+    private static int fontSize = 1;
+
+    public static void setFontSize(int size) {
+        if (size < 0) size = 0;
+        if (size > 2) size = 2;
+        fontSize = size;
+    }
+
     public static Font getBodyFont(ScreenMetrics metrics) {
         int shortSide = metrics.getWidth() < metrics.getHeight()
             ? metrics.getWidth() : metrics.getHeight();
 
-        if (shortSide < 160) {
+        if (fontSize == 0 || shortSide < 160) {
             return Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+        }
+        if (fontSize == 2 && shortSide >= 220) {
+            return Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
         }
         if (shortSide < 240) {
             return Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
