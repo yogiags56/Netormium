@@ -683,7 +683,14 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                 report.append("Platform: ").append(platform == null ? "Unknown" : platform).append("\n");
                 report.append("Configuration: ").append(config == null ? "Unknown" : config).append("\n");
                 report.append("Profiles: ").append(profile == null ? "Unknown" : profile).append("\n");
+                report.append("Gateway URL: ").append(interactive.getBaseUrl().length() == 0 ?
+                    "NOT CONFIGURED" : interactive.getBaseUrl()).append("\n");
                 report.append("Gateway: ").append(gateway).append("\n");
+                if (interactive.getBaseUrl().length() == 0) {
+                    report.append("Action: Set Netormium-Gateway-URL in the JAD or Settings.\n");
+                } else if (gateway.indexOf("OK") < 0) {
+                    report.append("Action: Check that the server is online, reachable from this phone, and allows HTTP.\n");
+                }
                 final String diagnosticText = report.toString();
                 final boolean healthy = gateway.indexOf("OK") >= 0;
                 Display.getDisplay(midlet).callSerially(new Runnable() {
