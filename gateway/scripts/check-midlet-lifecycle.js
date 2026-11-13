@@ -125,17 +125,18 @@ const checks = [
     canvas.includes('toggleRestoreLastPage()') &&
     canvas.includes('else if (selected == 6) showGatewaySettings();') &&
     canvas.includes('else if (selected == 7) showDiagnostics();')],
-  ['Start Page renders a touchable address/search field and aligns Speed Dial hit testing',
+  ['Start Page renders classic compact address bar and aligns Speed Dial hit testing',
     canvas.includes('Search or enter address') &&
-    canvas.includes('g.fillRoundRect(5, searchY, width - 10, searchHeight, 7, 7)') &&
+    canvas.includes('g.fillRect(5, searchY, width - 10, searchHeight)') &&
     canvas.includes('if (dial == -2) { showAddressBox(); return; }') &&
-    canvas.includes('int sectionY = shortcutY + shortcutHeight + 8;')],
-  ['Start Page exposes Bookmarks and History shortcuts with touch navigation',
-    canvas.includes('g.drawString("Bookmarks"') &&
-    canvas.includes('g.drawString("History"') &&
-    canvas.includes('if (dial == -3) { showBookmarks(); return; }') &&
-    canvas.includes('if (dial == -4) { showHistory(); return; }') &&
-    canvas.includes('int shortcutY = searchY + searchHeight + 6;')],
+    canvas.includes('int gridY = labelY + body.getHeight() + 4;')],
+  ['Start Page renders compact Top Sites tiles and keypad selection',
+    canvas.includes('g.drawString("TOP SITES"') &&
+    canvas.includes('int columns = width >= 220 ? 3 : 2;') &&
+    canvas.includes('int tileHeight = width >= 220 ? 51 : 43;') &&
+    canvas.includes('private int startPageSelection = 0;') &&
+    canvas.includes('if (action == LEFT && startPageSelection > 0)') &&
+    canvas.includes('if (i == startPageSelection)')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&
