@@ -70,6 +70,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private final Command enterCommand = new Command("Enter", Command.SCREEN, 6);
     private final Command dataSaverCommand = new Command("Toggle Data Saver", Command.SCREEN, 7);
     private boolean dataSaverEnabled = true;
+    private int fontSize = 1;
+    private boolean fullScreenEnabled = false;
     private final Command newTabCommand = new Command("New Tab", Command.SCREEN, 8);
     private final Command tabsCommand = new Command("Tabs", Command.SCREEN, 9);
     private final Command nextTabCommand = new Command("Next Tab", Command.SCREEN, 10);
@@ -98,6 +100,10 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         loader.configureBaseUrl(gatewayUrl);
         setFullScreenMode(false);
         dataSaverEnabled = preferences.loadDataSaver(true);
+        fontSize = preferences.loadFontSize();
+        fullScreenEnabled = preferences.loadFullScreen();
+        ThemeManager.setFontSize(fontSize);
+        setFullScreenMode(fullScreenEnabled);
         addCommand(openCommand);
         addCommand(menuCommand);
         setCommandListener(this);
@@ -213,7 +219,9 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                         return;
                     } else if ("Settings".equals(title)) {
                         if (selected == 0) toggleDataSaver();
-                        else if (selected == 1) showDiagnostics();
+                        else if (selected == 1) cycleFontSize();
+                        else if (selected == 2) toggleFullScreen();
+                        else if (selected == 3) showDiagnostics();
                         else showAbout();
                         return;
                     } else if ("Speed Dial".equals(title) && selected < speedDialUrls.length)
@@ -303,6 +311,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private void showSettings() {
         chooser = new List("Settings", List.IMPLICIT);
         chooser.append(dataSaverEnabled ? "Data Saver: On" : "Data Saver: Off", null);
+        chooser.append("Text size: " + fontSizeLabel(), null);
+        chooser.append(fullScreenEnabled ? "Full screen: On" : "Full screen: Off", null);
         chooser.append("Gateway diagnostics", null);
         chooser.append("About Netormium", null);
         chooser.addCommand(new Command("Back", Command.BACK, 1));
@@ -310,6 +320,9 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         Display.getDisplay(midlet).setCurrent(chooser);
     }
 
+    private String fontSizeLabel() { if (fontSize == 0) return "Small"; if (fontSize == 2) return "Large"; return "Normal"; }
+    private void cycleFontSize() { fontSize = (fontSize + 1) % 3; preferences.saveFontSize(fontSize); ThemeManager.setFontSize(fontSize); status = "Text size: " + fontSizeLabel(); repaint(); showSettings(); }
+    private void toggleFullScreen() { fullScreenEnabled = !fullScreenEnabled; preferences.saveFullScreen(fullScreenEnabled); setFullScreenMode(fullScreenEnabled); status = fullScreenEnabled ? "Full screen enabled" : "Full screen disabled"; repaint(); showSettings(); }
     private void toggleDataSaver() {
         dataSaverEnabled = !dataSaverEnabled;
         preferences.saveDataSaver(dataSaverEnabled);
