@@ -52,6 +52,20 @@ const checks = [
     canvas.includes('renameBookmarkCommand') && canvas.includes('deleteBookmarkCommand') &&
     canvas.includes('bookmarks.rename(bookmarkUrls[selectedBookmark], title)') &&
     canvas.includes('bookmarks.delete(bookmarkUrls[selected])')],
+  ['Speed Dial uses an independent persistent store with a bounded capacity',
+    read('src/com/netormium/client/util/SpeedDialStore.java').includes('STORE = "NetormiumSpeedDial"') &&
+    read('src/com/netormium/client/util/SpeedDialStore.java').includes('MAX_ITEMS = 12') &&
+    read('src/com/netormium/client/util/SpeedDialStore.java').includes('public boolean add(String title, String url)') &&
+    read('src/com/netormium/client/util/SpeedDialStore.java').includes('public boolean rename(String url, String title)') &&
+    read('src/com/netormium/client/util/SpeedDialStore.java').includes('public boolean delete(String url)')],
+  ['Speed Dial manager is connected to home screen, menu, keypad, and touch',
+    canvas.includes('private void showSpeedDial()') &&
+    canvas.includes('private void addCurrentSpeedDial()') &&
+    canvas.includes('else if (selected == 4) showSpeedDial();') &&
+    canvas.includes('SpeedDialStore.Entry[] items = speedDial.all();') &&
+    canvas.includes('loadUrl(items[selected - 1].url, true)') &&
+    canvas.includes('loadUrl(items[dial].url, true)') &&
+    canvas.includes('renameSpeedDialCommand') && canvas.includes('deleteSpeedDialCommand')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&
