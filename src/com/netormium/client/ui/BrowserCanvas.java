@@ -347,7 +347,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         repaint();
         new Thread(new Runnable() {
             public void run() {
-                com.netormium.client.net.InteractiveGateway.Page result = interactive.type(id, value);
+                final com.netormium.client.net.InteractiveGateway.Page result = interactive.type(id, value);
                 if (token != requestToken || !id.equals(sessionId)) return;
                 postUi(token, id, new Runnable() {
                     public void run() {
@@ -535,7 +535,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         repaint();
         new Thread(new Runnable() {
             public void run() {
-                com.netormium.client.net.InteractiveGateway.Page result = interactive.tap(id, x, y);
+                final com.netormium.client.net.InteractiveGateway.Page result = interactive.tap(id, x, y);
                 if (token != requestToken || !id.equals(sessionId)) return;
                 postUi(token, id, new Runnable() {
                     public void run() {
@@ -612,7 +612,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         final int token = requestToken;
         new Thread(new Runnable() {
             public void run() {
-                com.netormium.client.net.InteractiveGateway.Page result = interactive.key(id, key);
+                final com.netormium.client.net.InteractiveGateway.Page result = interactive.key(id, key);
                 if (token != requestToken || !id.equals(sessionId)) return;
                 postUi(token, id, new Runnable() {
                     public void run() {
