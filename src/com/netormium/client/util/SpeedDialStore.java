@@ -103,6 +103,40 @@ public final class SpeedDialStore {
         return false;
     }
 
+    public boolean move(String url, int offset) {
+        if (url == null || (offset != -1 && offset != 1)) return false;
+        Entry[] entries = all();
+        int index = -1;
+        for (int i = 0; i < entries.length; i++) {
+            if (url.equals(entries[i].url)) { index = i; break; }
+        }
+        int target = index + offset;
+        if (index < 0 || target < 0 || target >= entries.length) return false;
+        Entry temp = entries[index];
+        entries[index] = entries[target];
+        entries[target] = temp;
+
+        RecordStore rs = null;
+        try {
+            rs = RecordStore.openRecordStore(STORE, true);
+            RecordEnumeration en = rs.enumerateRecords(null, null, false);
+            try {
+                while (en.hasNextElement()) rs.deleteRecord(en.nextRecordId());
+            } finally { en.destroy(); }
+            for (int i = 0; i < entries.length; i++) {
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                DataOutputStream out = new DataOutputStream(bytes);
+                out.writeUTF(entries[i].title);
+                out.writeUTF(entries[i].url);
+                out.flush();
+                byte[] data = bytes.toByteArray();
+                rs.addRecord(data, 0, data.length);
+            }
+            return true;
+        } catch (Exception e) { return false; }
+        finally { try { if (rs != null) rs.closeRecordStore(); } catch (Exception ignored) {} }
+    }
+
     public Entry[] all() {
         java.util.Vector values = new java.util.Vector();
         RecordStore rs = null;
