@@ -18,6 +18,7 @@ import com.netormium.client.util.BrowserHistory;
 import com.netormium.client.util.UrlUtil;
 import com.netormium.client.util.TabManager;
 import com.netormium.client.util.BookmarkStore;
+import com.netormium.client.util.SpeedDialStore;
 import com.netormium.client.util.BrowserStateStore;
 import com.netormium.client.util.HistoryStore;
 import com.netormium.client.util.BrowserPreferences;
@@ -31,8 +32,14 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private final BrowserPreferences preferences = new BrowserPreferences();
     private final TabManager tabs = new TabManager();
     private final BookmarkStore bookmarks = new BookmarkStore();
+    private final SpeedDialStore speedDial = new SpeedDialStore();
+    private String[] speedDialUrls = new String[0];
+    private int selectedSpeedDial = -1;
+    private final Command renameSpeedDialCommand = new Command("Rename", Command.SCREEN, 1);
+    private final Command deleteSpeedDialCommand = new Command("Delete", Command.SCREEN, 2);
     private String[] bookmarkUrls = new String[0];
     private TextBox bookmarkRenameBox;
+    private TextBox speedDialRenameBox;
     private int selectedBookmark = -1;
     private final Command renameBookmarkCommand = new Command("Rename", Command.SCREEN, 1);
     private final Command deleteBookmarkCommand = new Command("Delete", Command.SCREEN, 2);
@@ -109,6 +116,15 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             } else Display.getDisplay(midlet).setCurrent(this);
             return;
         }
+        if (displayable == speedDialRenameBox) {
+            if (command.getCommandType() == Command.OK && selectedSpeedDial >= 0 &&
+                selectedSpeedDial < speedDialUrls.length) {
+                status = speedDial.rename(speedDialUrls[selectedSpeedDial], speedDialRenameBox.getString())
+                    ? "Speed Dial renamed" : "Rename failed";
+                showSpeedDial();
+            } else Display.getDisplay(midlet).setCurrent(this);
+            return;
+        }
         if (displayable == bookmarkRenameBox) {
             if (command.getCommandType() == Command.OK && selectedBookmark >= 0 &&
                 selectedBookmark < bookmarkUrls.length) {
@@ -125,6 +141,27 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             return;
         }
         if (displayable == chooser) {
+            if (command == renameSpeedDialCommand && "Speed Dial".equals(chooser.getTitle())) {
+                selectedSpeedDial = chooser.getSelectedIndex();
+                if (selectedSpeedDial >= 0 && selectedSpeedDial < speedDialUrls.length) {
+                    SpeedDialStore.Entry[] entries = speedDial.all();
+                    speedDialRenameBox = new TextBox("Rename Speed Dial", entries[selectedSpeedDial].title, 80, TextField.ANY);
+                    speedDialRenameBox.addCommand(new Command("Save", Command.OK, 1));
+                    speedDialRenameBox.addCommand(new Command("Cancel", Command.CANCEL, 2));
+                    speedDialRenameBox.setCommandListener(this);
+                    Display.getDisplay(midlet).setCurrent(speedDialRenameBox);
+                }
+                return;
+            }
+            if (command == deleteSpeedDialCommand && "Speed Dial".equals(chooser.getTitle())) {
+                int selected = chooser.getSelectedIndex();
+                if (selected >= 0 && selected < speedDialUrls.length) {
+                    status = speedDial.delete(speedDialUrls[selected])
+                        ? "Speed Dial entry deleted" : "Delete failed";
+                    showSpeedDial();
+                }
+                return;
+            }
             if (command == renameBookmarkCommand && "Bookmarks".equals(chooser.getTitle())) {
                 selectedBookmark = chooser.getSelectedIndex();
                 if (selectedBookmark >= 0 && selectedBookmark < bookmarkUrls.length) {
@@ -166,7 +203,9 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                         else if (selected == 1) showDiagnostics();
                         else showAbout();
                         return;
-                    } else if ("Open Tab".equals(title)) switchTab(selected);
+                    } else if ("Speed Dial".equals(title) && selected < speedDialUrls.length)
+                        loadUrl(speedDialUrls[selected], true);
+                    else if ("Open Tab".equals(title)) switchTab(selected);
                     else if ("Bookmarks".equals(title) && selected < bookmarkUrls.length)
                         loadUrl(bookmarkUrls[selected], true);
                     else if ("History".equals(title)) {
@@ -210,6 +249,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         chooser.append("Start page", null);
         chooser.append("Tabs", null);
         chooser.append("New tab", null);
+        chooser.append("Speed Dial", null);
+        chooser.append("Add to Speed Dial", null);
         chooser.append("Bookmarks", null);
         chooser.append("Add bookmark", null);
         chooser.append("History", null);
@@ -230,17 +271,19 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         else if (selected == 1) showHome();
         else if (selected == 2) showTabs();
         else if (selected == 3) createTab();
-        else if (selected == 4) showBookmarks();
-        else if (selected == 5) addCurrentBookmark();
-        else if (selected == 6) showHistory();
-        else if (selected == 7) {
+        else if (selected == 4) showSpeedDial();
+        else if (selected == 5) addCurrentSpeedDial();
+        else if (selected == 6) showBookmarks();
+        else if (selected == 7) addCurrentBookmark();
+        else if (selected == 8) showHistory();
+        else if (selected == 9) {
             if (currentUrl.length() > 0) loadUrl(currentUrl, false);
-        } else if (selected == 8) navigateHistory(false);
-        else if (selected == 9) toggleDataSaver();
-        else if (selected == 10) showSettings();
-        else if (selected == 11) showPageInformation();
-        else if (selected == 12) showDiagnostics();
-        else if (selected == 13) midlet.exit();
+        } else if (selected == 10) navigateHistory(false);
+        else if (selected == 11) toggleDataSaver();
+        else if (selected == 12) showSettings();
+        else if (selected == 13) showPageInformation();
+        else if (selected == 14) showDiagnostics();
+        else if (selected == 15) midlet.exit();
         else Display.getDisplay(midlet).setCurrent(this);
     }
 
@@ -365,6 +408,29 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         String[] labels = tabs.labels();
         for (int i = 0; i < labels.length; i++) chooser.append(labels[i], null);
         chooser.addCommand(new Command("Back", Command.BACK, 1));
+        chooser.setCommandListener(this);
+        Display.getDisplay(midlet).setCurrent(chooser);
+    }
+
+    private void addCurrentSpeedDial() {
+        if (currentUrl == null || currentUrl.length() == 0) status = "No page to add";
+        else status = speedDial.add(pageTitle, currentUrl)
+            ? "Added to Speed Dial" : "Speed Dial is full (12 entries)";
+        repaint();
+    }
+
+    private void showSpeedDial() {
+        SpeedDialStore.Entry[] entries = speedDial.all();
+        chooser = new List("Speed Dial", List.IMPLICIT);
+        speedDialUrls = new String[entries.length];
+        for (int i = 0; i < entries.length; i++) {
+            speedDialUrls[i] = entries[i].url;
+            chooser.append(entries[i].title, null);
+        }
+        if (entries.length == 0) chooser.append("No Speed Dial entries", null);
+        chooser.addCommand(renameSpeedDialCommand);
+        chooser.addCommand(deleteSpeedDialCommand);
+        chooser.addCommand(new Command("Back", Command.BACK, 3));
         chooser.setCommandListener(this);
         Display.getDisplay(midlet).setCurrent(chooser);
     }
@@ -908,7 +974,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         g.drawString("Speed Dial", 5, sectionY, Graphics.LEFT | Graphics.TOP);
         sectionY += body.getHeight() + 5;
 
-        BookmarkStore.Bookmark[] items = bookmarks.all();
+        SpeedDialStore.Entry[] items = speedDial.all();
         if (items.length == 0) {
             g.setColor(ThemeManager.MUTED);
             g.drawString("No Speed Dial entries yet.", 7, sectionY + 5,
@@ -977,7 +1043,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         int bottom = getHeight() - layout.getToolbarHeight() - 2;
         if (y >= top && y < bottom && currentUrl.length() == 0) {
             int dial = speedDialIndexAt(x, y, top, bottom);
-            BookmarkStore.Bookmark[] items = bookmarks.all();
+            SpeedDialStore.Entry[] items = speedDial.all();
             if (dial >= 0 && dial < items.length) loadUrl(items[dial].url, true);
         } else if (y >= top && y < bottom && sessionId.length() > 0) {
             tapPage(x, y - top);
@@ -1021,7 +1087,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         } else if (keyCode >= KEY_NUM1 && keyCode <= KEY_NUM9) {
             int selected = keyCode - KEY_NUM0;
             if (currentUrl.length() == 0) {
-                BookmarkStore.Bookmark[] items = bookmarks.all();
+                SpeedDialStore.Entry[] items = speedDial.all();
                 if (selected > 0 && selected <= items.length && selected <= 6) {
                     loadUrl(items[selected - 1].url, true);
                 }
