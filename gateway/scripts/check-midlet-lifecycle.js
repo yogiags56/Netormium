@@ -46,7 +46,18 @@ const checks = [
     (canvas.match(/interactionBusy = false;/g) || []).length >= 5],
   ['navigation worker uses viewport captured on UI thread',
     canvas.includes('final int viewportWidth =') && canvas.includes('final int viewportHeight =') &&
-    loadWorker.length > 0 && !loadWorker.includes('getWidth()') && !loadWorker.includes('getHeight()')]
+    loadWorker.length > 0 && !loadWorker.includes('getWidth()') && !loadWorker.includes('getHeight()')],
+  ['interactive transport rejects oversized declared response bodies',
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('long declaredLength = connection.getLength();') &&
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('if (declaredLength > maxBytes)')],
+  ['interactive transport guarantees progress on zero-byte reads',
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('int single = input.read();')],
+  ['PNG snapshot transport enforces declared and streamed byte limits',
+    read('src/com/netormium/client/net/SnapshotLoader.java').includes('if (declaredLength > MAX_IMAGE_BYTES)') &&
+    read('src/com/netormium/client/net/SnapshotLoader.java').includes('if (total > MAX_IMAGE_BYTES)')],
+  ['legacy page transport enforces declared and streamed byte limits',
+    read('src/com/netormium/client/net/GatewayPageLoader.java').includes('if (declaredLength > MAX_RESPONSE_BYTES)') &&
+    read('src/com/netormium/client/net/GatewayPageLoader.java').includes('if (total > MAX_RESPONSE_BYTES)')]
 ];
 
 let failed = false;
