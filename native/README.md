@@ -24,7 +24,7 @@ cmake -S native -B build/native-arm64 \
   -DANDROID_ABI=arm64-v8a \
   -DANDROID_PLATFORM=android-23 \
   -DBUILD_SHARED_LIBS=OFF
-cmake --build build/native-arm64 --target netormium_brotli_decoder
+cmake --build build/native-arm64 --target brotlidec
 ```
 
 Other useful ABIs to test later are `armeabi-v7a`, `x86`, and `x86_64`.
