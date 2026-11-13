@@ -38,7 +38,7 @@ public final class SnapshotLoader {
                 "&w=" + width + "&h=" + height + "&y=" + scrollY;
             connection = (HttpConnection) Connector.open(request, Connector.READ, true);
             connection.setRequestMethod(HttpConnection.GET);
-            connection.setRequestProperty("User-Agent", "Netormium/1.0-rc21 (Java ME)");
+            connection.setRequestProperty("User-Agent", "Netormium/1.0.0-rc21 (Java ME)");
             connection.setRequestProperty("Accept", "image/png");
             if (connection.getResponseCode() != 200) return null;
             long declaredLength = connection.getLength();
