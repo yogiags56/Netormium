@@ -172,6 +172,15 @@ const checks = [
     canvas.includes('items[16] = "Exit"') &&
     canvas.includes('else if (selected == 15) showAbout();') &&
     canvas.includes('else if (selected == 16) midlet.exit();')],
+  ['Diagnostics reports the configured gateway URL and next action',
+    canvas.includes('Gateway URL: ') &&
+    canvas.includes('"NOT CONFIGURED"') &&
+    canvas.includes('Set Netormium-Gateway-URL in the JAD or Settings.')],
+  ['Gateway listens on network interfaces for handset access',
+    read('gateway/server.js').includes("process.env.HOST || '0.0.0.0'")],
+  ['JAD and generated MIDlet manifest declare HTTP Connector permission',
+    read('resources/Netormium.jad.example').includes('MIDlet-Permissions: javax.microedition.io.Connector.http') &&
+    read('.github/workflows/j2me-toolchain-probe.yml').includes('MIDlet-Permissions: javax.microedition.io.Connector.http')],
   ['About displays the Netormium browser version and asynchronously fetched Chromium version',
     canvas.includes('Browser version: 1.0.0-rc21') &&
     canvas.includes('Gateway version: Checking...') &&
