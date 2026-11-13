@@ -4,6 +4,7 @@
 - Close old Chromium sessions on tab switches and new-tab creation; add an explicit MIDlet shutdown hook to close the active session.
 - Keep RMS tab state free of remote session IDs and bound persistent history storage.
 - Align Gateway package metadata, health response, diagnostics and Java ME User-Agent values to RC21.
+- Add static MIDlet lifecycle regression checks to both GitHub Actions validation workflows.
 
 ## 1.0.0-rc20 — Gateway network policy hardening
 - Added a dedicated Gateway host policy for HTTP(S)-only destinations.
