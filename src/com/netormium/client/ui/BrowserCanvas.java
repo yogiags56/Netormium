@@ -22,7 +22,7 @@ import com.netormium.client.util.BrowserStateStore;
 import com.netormium.client.util.HistoryStore;
 import com.netormium.client.util.BrowserPreferences;
 
-/** Browser shell 0.7: keypad focus navigation, resilient gateway errors and visual viewport. */
+/** Netormium RC20 browser canvas with keypad navigation and remote Chromium snapshots. */
 public final class BrowserCanvas extends Canvas implements CommandListener {
     private final NetormiumMIDlet midlet;
     private final BrowserHistory history = new BrowserHistory(100);
