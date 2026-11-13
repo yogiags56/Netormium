@@ -43,13 +43,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ant
 
+      - name: Prepare diagnostic directory
+        run: mkdir -p browser-build-report
+
       - name: Gateway tests
         working-directory: gateway
-        run: npm test
+        shell: bash
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee ../browser-build-report/gateway-tests.log
 
       - name: Release consistency
         working-directory: gateway
-        run: npm run check:release
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run check:release 2>&1 | tee ../browser-build-report/release-consistency.log
 
       - name: Ant project diagnostics
         run: ant -projecthelp
