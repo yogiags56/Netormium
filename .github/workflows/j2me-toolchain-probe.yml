@@ -67,11 +67,11 @@ jobs:
           PROGUARD_DIR="$(find toolchain/proguard -type f -name proguard.sh -print -quit | xargs -r dirname)"
           test -n "$PROGUARD_DIR"
           jar --create --file build/Netormium-unverified.jar -C build/classes .
-          cat > toolchain/netormium.pro <<'EOF'
-          -injars build/Netormium-unverified.jar
-          -outjars dist/Netormium.jar
-          -libraryjars toolchain/cldcapi11.jar
-          -libraryjars toolchain/midpapi20.jar
+          cat > toolchain/netormium.pro <<EOF
+          -injars $GITHUB_WORKSPACE/build/Netormium-unverified.jar
+          -outjars $GITHUB_WORKSPACE/dist/Netormium.jar
+          -libraryjars $GITHUB_WORKSPACE/toolchain/cldcapi11.jar
+          -libraryjars $GITHUB_WORKSPACE/toolchain/midpapi20.jar
           -dontshrink
           -dontoptimize
           -dontobfuscate
