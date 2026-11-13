@@ -22,6 +22,7 @@ import com.netormium.client.util.SpeedDialStore;
 import com.netormium.client.util.BrowserStateStore;
 import com.netormium.client.util.HistoryStore;
 import com.netormium.client.util.BrowserPreferences;
+import com.netormium.client.util.GatewaySettingsStore;
 
 /** Netormium RC21 browser canvas with keypad navigation and remote Chromium snapshots. */
 public final class BrowserCanvas extends Canvas implements CommandListener {
@@ -30,6 +31,9 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private final BrowserStateStore stateStore = new BrowserStateStore();
     private final HistoryStore historyStore = new HistoryStore();
     private final BrowserPreferences preferences = new BrowserPreferences();
+    private final GatewaySettingsStore gatewaySettings = new GatewaySettingsStore();
+    private TextBox gatewayBox;
+    private String jadGatewayUrl = "";
     private final TabManager tabs = new TabManager();
     private final BookmarkStore bookmarks = new BookmarkStore();
     private final SpeedDialStore speedDial = new SpeedDialStore();
@@ -96,6 +100,9 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     public BrowserCanvas(NetormiumMIDlet midlet) {
         this.midlet = midlet;
         String gatewayUrl = midlet.getAppProperty("Netormium-Gateway-URL");
+        jadGatewayUrl = gatewayUrl == null ? "" : gatewayUrl;
+        String savedGateway = gatewaySettings.load();
+        if (savedGateway.length() > 0) gatewayUrl = savedGateway;
         interactive.configureBaseUrl(gatewayUrl);
         snapshotLoader.configureBaseUrl(gatewayUrl);
         loader.configureBaseUrl(gatewayUrl);
@@ -114,6 +121,22 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     }
 
     public void commandAction(Command command, javax.microedition.lcdui.Displayable displayable) {
+        if (displayable == gatewayBox) {
+            if (command.getCommandType() == Command.OK) {
+                String value = gatewayBox.getString().trim();
+                if (value.length() == 0) {
+                    gatewaySettings.clear();
+                    configureGateway(jadGatewayUrl);
+                    status = "Using default JAD gateway";
+                } else if (gatewaySettings.save(value)) {
+                    configureGateway(value);
+                    status = "Gateway address saved";
+                } else status = "Invalid gateway URL";
+                repaint();
+                showSettings();
+            } else Display.getDisplay(midlet).setCurrent(this);
+            return;
+        }
         if (displayable == addressBox) {
             if (command.getCommandType() == Command.OK) {
                 String url = UrlUtil.normalize(addressBox.getString());
@@ -233,7 +256,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                         if (selected == 0) toggleDataSaver();
                         else if (selected == 1) cycleFontSize();
                         else if (selected == 2) toggleFullScreen();
-                        else if (selected == 3) showDiagnostics();
+                        else if (selected == 3) showGatewaySettings();
+                        else if (selected == 4) showDiagnostics();
                         else showAbout();
                         return;
                     } else if ("Speed Dial".equals(title) && selected < speedDialUrls.length)
@@ -325,11 +349,28 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         chooser.append(dataSaverEnabled ? "Data Saver: On" : "Data Saver: Off", null);
         chooser.append("Text size: " + fontSizeLabel(), null);
         chooser.append(fullScreenEnabled ? "Full screen: On" : "Full screen: Off", null);
+        chooser.append("Gateway address", null);
         chooser.append("Gateway diagnostics", null);
         chooser.append("About Netormium", null);
         chooser.addCommand(new Command("Back", Command.BACK, 1));
         chooser.setCommandListener(this);
         Display.getDisplay(midlet).setCurrent(chooser);
+    }
+
+    private void configureGateway(String value) {
+        interactive.configureBaseUrl(value);
+        snapshotLoader.configureBaseUrl(value);
+        loader.configureBaseUrl(value);
+    }
+
+    private void showGatewaySettings() {
+        String current = gatewaySettings.load();
+        if (current.length() == 0) current = jadGatewayUrl;
+        gatewayBox = new TextBox("Gateway URL", current, 180, TextField.URL);
+        gatewayBox.addCommand(new Command("Save", Command.OK, 1));
+        gatewayBox.addCommand(new Command("Cancel", Command.CANCEL, 2));
+        gatewayBox.setCommandListener(this);
+        Display.getDisplay(midlet).setCurrent(gatewayBox);
     }
 
     private String fontSizeLabel() { if (fontSize == 0) return "Small"; if (fontSize == 2) return "Large"; return "Normal"; }
