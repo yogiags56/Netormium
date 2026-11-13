@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Netormium Globe</title>
+  <desc id="desc">An original blue globe mark with simplified latitude and longitude lines.</desc>
+  <circle cx="32" cy="32" r="27" fill="#1769AA"/>
+  <path d="M8.8 25.5h46.4M8.8 38.5h46.4" fill="none" stroke="#E8F0F8" stroke-width="2.6" stroke-linecap="round" opacity=".95"/>
+  <path d="M32 5.2c-8.1 7.2-12.3 16.3-12.3 26.8S23.9 51.6 32 58.8M32 5.2c8.1 7.2 12.3 16.3 12.3 26.8S40.1 51.6 32 58.8" fill="none" stroke="#E8F0F8" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M15.5 15.5a27 27 0 0 1 33 0M15.5 48.5a27 27 0 0 0 33 0" fill="none" stroke="#2E9D68" stroke-width="2.4" stroke-linecap="round"/>
+</svg>
