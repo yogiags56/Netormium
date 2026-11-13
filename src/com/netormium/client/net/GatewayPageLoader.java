@@ -76,8 +76,7 @@ public final class GatewayPageLoader {
                 return page;
             }
             input = connection.openInputStream();
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream(
-                declaredLength > 0 ? (int)declaredLength : 4096);
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream(4096);
             byte[] buffer = new byte[1024];
             int count;
             int total = 0;
