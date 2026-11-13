@@ -56,29 +56,6 @@ jobs:
           find build/classes -name '*.class' | sort > toolchain/compiled-classes.txt
           echo "Compiled class count: $(wc -l < toolchain/compiled-classes.txt)"
 
-      - name: Preverify compiled classes with ProGuard
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p build/proguard toolchain
-          jar cf build/netormium-raw.jar -C build/classes .
-          curl --fail --location --retry 3 --output toolchain/proguard-7.7.0.zip https://github.com/Guardsquare/proguard/releases/download/v7.7.0/proguard-7.7.0.zip
-          unzip -q toolchain/proguard-7.7.0.zip -d toolchain/proguard
-          cat > build/proguard/netormium.pro <<'EOF'
-          -injars build/netormium-raw.jar
-          -outjars build/netormium-preverified.jar
-          -libraryjars toolchain/cldcapi11.jar
-          -libraryjars toolchain/midpapi20.jar
-          -dontshrink
-          -dontoptimize
-          -dontobfuscate
-          -microedition
-          -keep class ** { *; }
-          EOF
-          java -cp "toolchain/proguard/proguard-7.7.0/lib/*" proguard.ProGuard @build/proguard/netormium.pro
-          test -s build/netormium-preverified.jar
-          jar tf build/netormium-preverified.jar | grep -Fx 'com/netormium/client/NetormiumMIDlet.class'
-          echo "ProGuard Java ME preverification completed."
       - name: Preverify and package MIDlet with ProGuard
         shell: bash
         run: |
@@ -136,5 +113,5 @@ jobs:
           path: |
             toolchain/ecj-help.txt
             toolchain/compiled-classes.txt
-            build/netormium-preverified.jar
+            dist/Netormium.jar\n            dist/Netormium.jad
           if-no-files-found: warn
