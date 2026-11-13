@@ -158,6 +158,10 @@ const checks = [
     read('src/com/netormium/client/net/GatewayPageLoader.java').includes('if (declaredLength > MAX_RESPONSE_BYTES)') &&
     read('src/com/netormium/client/net/GatewayPageLoader.java').includes('if (total > MAX_RESPONSE_BYTES)') &&
     read('src/com/netormium/client/net/GatewayPageLoader.java').includes('new ByteArrayOutputStream(4096)')],
+  ['Main menu exposes About Netormium as a direct classic menu item',
+    canvas.includes('chooser.append("About Netormium", null)') &&
+    canvas.includes('else if (selected == 15) showAbout();') &&
+    canvas.includes('else if (selected == 16) midlet.exit();')],
   ['About displays the Netormium browser version and asynchronously fetched Chromium version',
     canvas.includes('Browser version: 1.0.0-rc21') &&
     canvas.includes('Gateway version: Checking...') &&
