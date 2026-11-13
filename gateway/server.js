@@ -1,5 +1,5 @@
 /**
- * Netormium Chromium Gateway 1.0.0-rc20
+ * Netormium Chromium Gateway 1.0.0-rc21
  * Node.js + Playwright. Run only on a trusted server.
  */
 'use strict';
@@ -329,7 +329,7 @@ async function render(rawUrl) {
 const server = http.createServer(async (req, res) => {
   const requestUrl = new URL(req.url, 'http://' + req.headers.host);
   if (req.method === 'GET' && requestUrl.pathname === '/health') {
-    return send(res, 200, 'Netormium Gateway 1.0 RC20 OK\n');
+    return send(res, 200, 'Netormium Gateway 1.0 RC21 OK\n');
   }
   if (req.method === 'GET' && requestUrl.pathname === '/v1/session/cancel') {
     const requestId = requestUrl.searchParams.get('rid') || '';
