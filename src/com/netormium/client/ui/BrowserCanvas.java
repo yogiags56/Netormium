@@ -1276,8 +1276,14 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         if (mainMenuOpen) {
             int footerHeight = Math.max(18, ThemeManager.getBodyFont(
                 new ScreenMetrics(getWidth(), getHeight())).getHeight() + 7);
-            if (y >= getHeight() - footerHeight && x >= getWidth() / 2) {
-                closeMainMenu();
+            if (y >= getHeight() - footerHeight) {
+                if (x >= getWidth() / 2) {
+                    closeMainMenu();
+                } else {
+                    int selected = mainMenuSelection;
+                    mainMenuOpen = false;
+                    handleMainMenuSelection(selected);
+                }
                 return;
             }
             Font body = ThemeManager.getBodyFont(new ScreenMetrics(getWidth(), getHeight()));
