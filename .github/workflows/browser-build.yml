@@ -1,6 +1,14 @@
 name: Netormium Browser Build
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "gateway/**"
+      - "src/**"
+      - "build.xml"
+      - "build.properties.example"
+      - ".github/workflows/browser-build.yml"
   workflow_dispatch:
     inputs:
       run_java_me_release:
