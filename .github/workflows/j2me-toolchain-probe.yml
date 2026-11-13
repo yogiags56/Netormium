@@ -76,6 +76,17 @@ jobs:
           -keep class ** { *; }
           EOF
           java -jar proguard-base.jar @proguard.pro
+          cat > toolchain/MANIFEST.MF <<'EOF'
+          Manifest-Version: 1.0
+          MIDlet-Name: Netormium
+          MIDlet-Version: 1.0.0
+          MIDlet-Vendor: Netormium Project
+          MIDlet-1: Netormium,,com.netormium.client.NetormiumMIDlet
+          MicroEdition-Profile: MIDP-2.0
+          MicroEdition-Configuration: CLDC-1.1
+
+          EOF
+          jar --update --file dist/Netormium.jar --manifest toolchain/MANIFEST.MF
           test -s dist/Netormium.jar
           jar tf dist/Netormium.jar | grep -Fx 'com/netormium/client/NetormiumMIDlet.class'
           if jar tf dist/Netormium.jar | grep -q '^javax/microedition/'; then
