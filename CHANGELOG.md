@@ -5,6 +5,8 @@
 - Keep RMS tab state free of remote session IDs and bound persistent history storage.
 - Align Gateway package metadata, health response, diagnostics and Java ME User-Agent values to RC21.
 - Add static MIDlet lifecycle regression checks to both GitHub Actions validation workflows.
+- Mark worker callback payloads final for legacy Java source rules and extend source checks for captured locals and Java 1.3 syntax.
+- Correct diagnostic report line breaks and update the RC21 welcome message.
 
 ## 1.0.0-rc20 — Gateway network policy hardening
 - Added a dedicated Gateway host policy for HTTP(S)-only destinations.
