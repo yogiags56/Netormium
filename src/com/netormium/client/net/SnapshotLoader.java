@@ -41,11 +41,22 @@ public final class SnapshotLoader {
             connection.setRequestProperty("User-Agent", "Netormium/1.0-rc21 (Java ME)");
             connection.setRequestProperty("Accept", "image/png");
             if (connection.getResponseCode() != 200) return null;
+            long declaredLength = connection.getLength();
+            if (declaredLength > MAX_IMAGE_BYTES) return null;
             input = connection.openInputStream();
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream(
+                declaredLength > 0 ? (int)declaredLength : 4096);
             byte[] buffer = new byte[1024];
             int count, total = 0;
             while ((count = input.read(buffer)) != -1) {
+                if (count == 0) {
+                    int single = input.read();
+                    if (single < 0) break;
+                    total++;
+                    if (total > MAX_IMAGE_BYTES) return null;
+                    bytes.write(single);
+                    continue;
+                }
                 total += count;
                 if (total > MAX_IMAGE_BYTES) return null;
                 bytes.write(buffer, 0, count);
