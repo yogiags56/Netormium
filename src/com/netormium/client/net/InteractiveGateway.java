@@ -76,10 +76,12 @@ public final class InteractiveGateway {
         return value.length() == 0 ? "Connected (empty response)" : value;
     }
 
-    /** Reads the exact browser engine version running in the remote gateway. */
+    /** Reads runtime versions from the remote gateway and reports connection state. */
     public String getRuntimeInfo() {
         byte[] data = requestBytes("/v1/info", 1024);
-        if (data == null) return "Gateway: Unavailable\nChromium: Unavailable";
+        if (data == null) {
+            return "Connection: Unavailable\nGateway version: Unavailable\nChromium version: Unavailable";
+        }
         String response = new String(data);
         String gatewayVersion = "Unknown";
         String chromiumVersion = "Unknown";
@@ -92,7 +94,8 @@ public final class InteractiveGateway {
             else if (line.startsWith("CHROMIUM\t")) chromiumVersion = line.substring(9);
             start = end + 1;
         }
-        return "Gateway: " + gatewayVersion + "\nChromium: " + chromiumVersion;
+        return "Connection: Connected\nGateway version: " + gatewayVersion +
+            "\nChromium version: " + chromiumVersion;
     }
 
     public Page open(String url, int width, int height) {
