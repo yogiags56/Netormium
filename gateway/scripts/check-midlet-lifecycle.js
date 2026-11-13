@@ -164,7 +164,9 @@ const checks = [
     canvas.includes('g.fillRect(x + 1, top + 1, panelWidth - 2, headerHeight)') &&
     canvas.includes('if (mainMenuOpen)') &&
     canvas.includes('mainMenuSelection++;') &&
-    canvas.includes('handleMainMenuSelection(selected);')],
+    canvas.includes('handleMainMenuSelection(selected);') &&
+    canvas.includes('x >= getWidth() / 2') &&
+    canvas.includes('int selected = mainMenuSelection;')],
   ['Canvas main menu exposes About and Exit actions',
     canvas.includes('items[15] = "About Netormium"') &&
     canvas.includes('items[16] = "Exit"') &&
