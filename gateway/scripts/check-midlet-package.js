@@ -79,17 +79,19 @@ function validatePackage(jarFile, jadFile, options = {}) {
 
   const requiredManifest = [
     'MIDlet-Name', 'MIDlet-Version', 'MIDlet-Vendor',
-    'MIDlet-1', 'MicroEdition-Profile', 'MicroEdition-Configuration'
+    'MIDlet-1', 'MIDlet-Permissions', 'MicroEdition-Profile', 'MicroEdition-Configuration'
   ];
   for (const key of requiredManifest) {
     if (!manifest[key]) errors.push(`Manifest missing ${key}`);
   }
+  if (!manifest['MIDlet-Permissions'] || manifest['MIDlet-Permissions'].indexOf('javax.microedition.io.Connector.http') < 0) errors.push('Manifest must declare HTTP Connector permission');
+  if (!jad['MIDlet-Permissions'] || jad['MIDlet-Permissions'].indexOf('javax.microedition.io.Connector.http') < 0) errors.push('JAD must declare HTTP Connector permission');
   if (manifest['MicroEdition-Profile'] !== 'MIDP-2.0') errors.push('Manifest profile must be MIDP-2.0');
   if (manifest['MicroEdition-Configuration'] !== 'CLDC-1.1') errors.push('Manifest configuration must be CLDC-1.1');
 
   const requiredJad = [
     'MIDlet-Name', 'MIDlet-Version', 'MIDlet-Vendor',
-    'MIDlet-1', 'MIDlet-Jar-URL', 'MIDlet-Jar-Size'
+    'MIDlet-1', 'MIDlet-Permissions', 'MIDlet-Jar-URL', 'MIDlet-Jar-Size'
   ];
   for (const key of requiredJad) {
     if (!jad[key]) errors.push(`JAD missing ${key}`);
