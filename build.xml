@@ -68,7 +68,7 @@
         <mkdir dir="${classes.dir}"/>
         <available file="${ecj.jar}" type="file" property="ecj.jar.exists"/>
         <fail unless="ecj.jar.exists" message="compiler.backend=ecj requires ecj.jar to point to an Eclipse Compiler JAR."/>
-        <java classname="org.eclipse.jdt.compiler.batch.BatchCompiler"
+        <java classname="org.eclipse.jdt.internal.compiler.batch.Main"
               fork="true" failonerror="true">
             <classpath><pathelement location="${ecj.jar}"/></classpath>
             <arg value="-1.3"/>
