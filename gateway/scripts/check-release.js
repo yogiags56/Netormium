@@ -16,7 +16,7 @@ const release = pkg.version;
 const clientVersion = release.replace(/^1\.0\.0/, '1.0');
 const checks = [
   ['Gateway banner', server.includes('Netormium Chromium Gateway ' + release)],
-  ['Gateway health response', server.includes('Netormium Gateway 1.0 RC19 OK')],
+  ['Gateway health response', server.includes('Netormium Gateway 1.0 RC20 OK')],
   ['Java ME User-Agent', client.includes('Netormium/' + clientVersion + ' (Java ME)')],
   ['JAD MIDlet version', /^MIDlet-Version:\s*1\.0\.0\s*$/m.test(jad)],
   ['JAD MIDP/CLDC profiles', jad.includes('MicroEdition-Profile: MIDP-2.0') &&
@@ -24,7 +24,7 @@ const checks = [
   ['Configurable Gateway URL property', client.includes('configureBaseUrl') &&
     snapshotClient.includes('configureBaseUrl') && legacyClient.includes('configureBaseUrl') &&
     jad.includes('Netormium-Gateway-URL:')],
-  ['All Java ME clients use RC19 identity', client.includes('Netormium/' + clientVersion) &&
+  ['All Java ME clients use RC20 identity', client.includes('Netormium/' + clientVersion) &&
     snapshotClient.includes('Netormium/' + clientVersion) &&
     legacyClient.includes('Netormium/' + clientVersion)]
 ];
