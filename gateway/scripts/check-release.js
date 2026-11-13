@@ -12,43 +12,29 @@ const client = fs.readFileSync(path.join(projectDir, 'src/com/netormium/client/n
 const snapshotClient = fs.readFileSync(path.join(projectDir, 'src/com/netormium/client/net/SnapshotLoader.java'), 'utf8');
 const legacyClient = fs.readFileSync(path.join(projectDir, 'src/com/netormium/client/net/GatewayPageLoader.java'), 'utf8');
 const jad = fs.readFileSync(path.join(projectDir, 'resources/Netormium.jad.example'), 'utf8');
-const jadVersionLine = jad.split(/\\r?\\n/).filter(line => line.indexOf('MIDlet-Version:') === 0)[0] || '';
+const jadVersionLine = jad.split(/\r?\n/).filter(line => line.indexOf('MIDlet-Version:') === 0)[0] || '';
 const jadVersion = jadVersionLine.substring('MIDlet-Version:'.length).trim();
 
 const release = pkg.version;
-const clientVersion = release;
 const checks = [
   ['Gateway banner', server.includes('Netormium Chromium Gateway ' + release)],
-  ['Gateway runtime version derives from package metadata', server.includes("require('./package.json').version") && server.includes("'GATEWAY\\t' + GATEWAY_VERSION")],
-  ['Gateway health response uses the package version', server.includes("'Netormium Gateway ' + GATEWAY_VERSION + ' OK\\n'")],
-  ['Java ME User-Agent', client.includes('Netormium/' + clientVersion + ' (Java ME)')],
-  ['Build and JAD use the gateway release version', build.includes('value="' + release + '"') && jadVersion === release],') + '\\s*
+  ['Gateway runtime version derives from package metadata',
+    server.includes("require('./package.json').version") &&
+    server.includes("'GATEWAY\\t' + GATEWAY_VERSION")],
+  ['Gateway health response uses the package version',
+    server.includes("'Netormium Gateway ' + GATEWAY_VERSION + ' OK\\n'")],
+  ['Build and JAD use the gateway release version',
+    build.includes('value="' + release + '"') && jadVersion === release],
+  ['Java ME User-Agent', client.includes('Netormium/' + release + ' (Java ME)')],
   ['JAD MIDP/CLDC profiles', jad.includes('MicroEdition-Profile: MIDP-2.0') &&
     jad.includes('MicroEdition-Configuration: CLDC-1.1')],
   ['Configurable Gateway URL property', client.includes('configureBaseUrl') &&
     snapshotClient.includes('configureBaseUrl') && legacyClient.includes('configureBaseUrl') &&
     jad.includes('Netormium-Gateway-URL:')],
-  ['All Java ME clients use the exact release identity', client.includes('Netormium/' + clientVersion) &&
-    snapshotClient.includes('Netormium/' + clientVersion) &&
-    legacyClient.includes('Netormium/' + clientVersion)]
-];
-
-let failed = false;
-checks.forEach(([name, ok]) => {
-  process.stdout.write((ok ? 'PASS ' : 'FAIL ') + name + '\n');
-  if (!ok) failed = true;
-});
-if (failed) process.exitCode = 1;
-else process.stdout.write('Release consistency checks passed for ' + release + '.\n');
-, 'm').test(jad)],
-  ['JAD MIDP/CLDC profiles', jad.includes('MicroEdition-Profile: MIDP-2.0') &&
-    jad.includes('MicroEdition-Configuration: CLDC-1.1')],
-  ['Configurable Gateway URL property', client.includes('configureBaseUrl') &&
-    snapshotClient.includes('configureBaseUrl') && legacyClient.includes('configureBaseUrl') &&
-    jad.includes('Netormium-Gateway-URL:')],
-  ['All Java ME clients use the exact release identity', client.includes('Netormium/' + clientVersion) &&
-    snapshotClient.includes('Netormium/' + clientVersion) &&
-    legacyClient.includes('Netormium/' + clientVersion)]
+  ['All Java ME clients use the exact release identity',
+    client.includes('Netormium/' + release) &&
+    snapshotClient.includes('Netormium/' + release) &&
+    legacyClient.includes('Netormium/' + release)]
 ];
 
 let failed = false;
