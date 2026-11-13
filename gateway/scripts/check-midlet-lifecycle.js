@@ -69,7 +69,7 @@ const checks = [
   ['preferences persist font size and full-screen mode with backward-compatible Data Saver',
     read('src/com/netormium/client/util/BrowserPreferences.java').includes('public int loadFontSize()') &&
     read('src/com/netormium/client/util/BrowserPreferences.java').includes('public boolean loadFullScreen()') &&
-    read('src/com/netormium/client/util/BrowserPreferences.java').includes('private static final int VERSION = 2') &&
+    read('src/com/netormium/client/util/BrowserPreferences.java').includes('private static final int VERSION = 4') &&
     canvas.includes('preferences.saveFontSize(fontSize)') &&
     canvas.includes('preferences.saveFullScreen(fullScreenEnabled)') &&
     canvas.includes('ThemeManager.setFontSize(fontSize)') &&
@@ -94,7 +94,7 @@ const checks = [
     read('src/com/netormium/client/util/BrowserHistory.java').includes('else if (position == index && index >= size) index = size - 1;')],
   ['gateway endpoint override is persisted and validated independently of JAD defaults',
     read('src/com/netormium/client/util/GatewaySettingsStore.java').includes('public boolean save(String value)') &&
-    read('src/com/netormium/client/util/GatewaySettingsStore.java').includes('value.indexOf(\'@\') < 0') &&
+    read('src/com/netormium/client/util/GatewaySettingsStore.java').includes("authority.indexOf('@') < 0") &&
     canvas.includes('gatewaySettings.save(value)') &&
     canvas.includes('gatewaySettings.load()') &&
     canvas.includes('gatewaySettings.clear()')],
@@ -106,7 +106,7 @@ const checks = [
     canvas.includes('showGatewaySettings()') &&
     canvas.includes('chooser.append("Gateway address", null)')],
   ['page preferences persist Load Images and Mobile View in settings schema v3',
-    read('src/com/netormium/client/util/BrowserPreferences.java').includes('VERSION = 3') &&
+    read('src/com/netormium/client/util/BrowserPreferences.java').includes('VERSION = 4') &&
     read('src/com/netormium/client/util/BrowserPreferences.java').includes('public boolean loadImages()') &&
     read('src/com/netormium/client/util/BrowserPreferences.java').includes('public boolean loadMobileView()') &&
     canvas.includes('preferences.saveLoadImages(loadImagesEnabled)') &&
@@ -129,7 +129,7 @@ const checks = [
     canvas.includes('Search or enter address') &&
     canvas.includes('g.fillRoundRect(5, searchY, width - 10, searchHeight, 7, 7)') &&
     canvas.includes('if (dial == -2) { showAddressBox(); return; }') &&
-    canvas.includes('int sectionY = searchY + searchHeight + 10;')],
+    canvas.includes('int sectionY = shortcutY + shortcutHeight + 8;')],
   ['Start Page exposes Bookmarks and History shortcuts with touch navigation',
     canvas.includes('g.drawString("Bookmarks"') &&
     canvas.includes('g.drawString("History"') &&
