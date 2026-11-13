@@ -79,6 +79,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private final Command bookmarksCommand = new Command("Bookmarks", Command.SCREEN, 12);
     private final Command historyCommand = new Command("History", Command.SCREEN, 13);
     private final Command clearHistoryCommand = new Command("Clear History", Command.SCREEN, 14);
+    private final Command deleteHistoryEntryCommand = new Command("Delete Entry", Command.SCREEN, 15);
     private final Command stopCommand = new Command("Stop", Command.STOP, 15);
     private final Command exitCommand = new Command("Exit", Command.EXIT, 16);
     private final Command diagnosticsCommand = new Command("Diagnostics", Command.SCREEN, 17);
@@ -208,6 +209,17 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                 historyStore.save(history);
                 status = "History cleared";
                 showHistory();
+                return;
+            }
+            if (command == deleteHistoryEntryCommand && "History".equals(chooser.getTitle())) {
+                int selected = chooser.getSelectedIndex();
+                String[] entries = history.entries();
+                int historyIndex = entries.length - 1 - selected;
+                if (historyIndex >= 0 && historyIndex < entries.length) {
+                    status = history.removeAt(historyIndex) ? "History entry deleted" : "Delete failed";
+                    historyStore.save(history);
+                    showHistory();
+                }
                 return;
             }
             if (command == List.SELECT_COMMAND) {
@@ -490,6 +502,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         chooser = new List("History", List.IMPLICIT);
         for (int i = entries.length - 1; i >= 0; i--) chooser.append(entries[i], null);
         if (entries.length == 0) chooser.append("No history yet", null);
+        chooser.addCommand(deleteHistoryEntryCommand);
         chooser.addCommand(clearHistoryCommand);
         chooser.addCommand(new Command("Back", Command.BACK, 1));
         chooser.setCommandListener(this);
