@@ -47,9 +47,9 @@ test('checks preverifier regular-file and executable permission', () => {
 });
 
 test('uses the documented ECJ batch compiler entry point', () => {
-  assert.equal(ECJ_MAIN_CLASS, 'org.eclipse.jdt.compiler.batch.BatchCompiler');
+  assert.equal(ECJ_MAIN_CLASS, 'org.eclipse.jdt.internal.compiler.batch.Main');
   assert.deepEqual(ecjProbeArguments('/tools/ecj.jar'), [
-    '-cp', '/tools/ecj.jar', 'org.eclipse.jdt.compiler.batch.BatchCompiler', '-help'
+    '-cp', '/tools/ecj.jar', 'org.eclipse.jdt.internal.compiler.batch.Main', '-help'
   ]);
 });
 test('requires a successful ECJ help command advertising legacy 1.3 mode', () => {
