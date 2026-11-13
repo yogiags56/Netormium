@@ -267,7 +267,7 @@ async function renderSnapshot(rawUrl, width, height, scrollY) {
 }
 
 async function render(rawUrl) {
-  if (!isPublicHttpUrl(rawUrl)) {
+  if (!await isSafePublicHttpUrl(rawUrl)) {
     return protocolResponse(400, '', '', '', [], 'URL rejected by gateway policy');
   }
 
