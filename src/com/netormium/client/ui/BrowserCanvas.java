@@ -79,9 +79,10 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     public BrowserCanvas(NetormiumMIDlet midlet) {
         this.midlet = midlet;
         String gatewayUrl = midlet.getAppProperty("Netormium-Gateway-URL");
-        interactive.configureBaseUrl(gatewayUrl);
-        snapshotLoader.configureBaseUrl(gatewayUrl);
-        loader.configureBaseUrl(gatewayUrl);
+        String gatewayToken = midlet.getAppProperty("Netormium-Gateway-Token");
+        interactive.configureBaseUrl(gatewayUrl, gatewayToken);
+        snapshotLoader.configureBaseUrl(gatewayUrl, gatewayToken);
+        loader.configureBaseUrl(gatewayUrl, gatewayToken);
         setFullScreenMode(false);
         addCommand(openCommand);
         addCommand(homeCommand);

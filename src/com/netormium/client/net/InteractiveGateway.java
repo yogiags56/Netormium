@@ -8,6 +8,7 @@ import javax.microedition.io.HttpConnection;
 /** NTM/2 persistent browser session client for MIDP 2.0 / CLDC 1.1. */
 public final class InteractiveGateway {
     private String baseUrl = "";
+    private String apiToken = "";
     private static final int MAX_META = 60000;
     private static final int MAX_PNG = 180000;
     private volatile String lastTransportError = "";
@@ -30,7 +31,8 @@ public final class InteractiveGateway {
         public boolean dataSaver = false;
     }
 
-    public void configureBaseUrl(String value) {
+    public void configureBaseUrl(String value, String token) {
+        apiToken = token == null ? "" : token.trim();
         if (value == null) return;
         String candidate = value.trim();
         while (candidate.endsWith("/")) {
@@ -217,6 +219,7 @@ public final class InteractiveGateway {
             connection = (HttpConnection) Connector.open(baseUrl + path, Connector.READ, true);
             connection.setRequestMethod(HttpConnection.GET);
             connection.setRequestProperty("User-Agent", "Netormium/1.0-rc21 (Java ME)");
+            if (apiToken.length() > 0) connection.setRequestProperty("Authorization", "Bearer " + apiToken);
             int code = connection.getResponseCode();
             if (code < 200 || code >= 300) {
                 lastTransportError = code == 404

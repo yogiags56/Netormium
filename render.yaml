@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: netormium-gateway
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: GATEWAY_API_TOKEN
+        sync: false

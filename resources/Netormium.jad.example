@@ -7,4 +7,5 @@ MIDlet-Jar-URL: Netormium.jar
 MIDlet-Jar-Size: 0
 MicroEdition-Profile: MIDP-2.0
 MicroEdition-Configuration: CLDC-1.1
-Netormium-Gateway-URL: http://192.168.1.10:8787
+Netormium-Gateway-URL: https://YOUR-NETORMIUM-SERVICE.onrender.com
+Netormium-Gateway-Token: REPLACE_WITH_PRIVATE_DEPLOYMENT_TOKEN

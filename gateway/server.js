@@ -16,6 +16,7 @@ const viewportLimits = require('./viewport-limits');
 
 const HOST = process.env.HOST || '127.0.0.1';
 const PORT = Number(process.env.PORT || 8787);
+const API_TOKEN = process.env.GATEWAY_API_TOKEN || '';
 const MAX_URL_LENGTH = 4096;
 const NAV_TIMEOUT = 20000;
 const MAX_TEXT = 48000;
@@ -331,6 +332,15 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && requestUrl.pathname === '/health') {
     return send(res, 200, 'Netormium Gateway 1.0 RC21 OK\n');
   }
+  if (API_TOKEN) {
+    const authorization = String(req.headers.authorization || '');
+    const expected = Buffer.from('Bearer ' + API_TOKEN, 'utf8');
+    const supplied = Buffer.from(authorization, 'utf8');
+    if (expected.length !== supplied.length || !crypto.timingSafeEqual(expected, supplied)) {
+      res.writeHead(401, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', 'WWW-Authenticate': 'Bearer' });
+      return res.end('Unauthorized\\n');
+    }
+  }
   if (req.method === 'GET' && requestUrl.pathname === '/v1/session/cancel') {
     const requestId = requestUrl.searchParams.get('rid') || '';
     const cancelled = pendingNavigations.cancel(requestId);
@@ -490,6 +500,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 (async () => {
+  if (process.env.NODE_ENV === 'production' && !API_TOKEN) throw new Error('GATEWAY_API_TOKEN is required in production');
   browser = await chromium.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-dev-shm-usage']

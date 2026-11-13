@@ -12,8 +12,10 @@ import com.netormium.client.util.UrlUtil;
  */
 public final class GatewayPageLoader {
     private String baseUrl = "";
+    private String apiToken = "";
 
-    public void configureBaseUrl(String value) {
+    public void configureBaseUrl(String value, String token) {
+        apiToken = token == null ? "" : token.trim();
         if (value == null) return;
         String candidate = value.trim();
         while (candidate.endsWith("/")) candidate = candidate.substring(0, candidate.length() - 1);
@@ -61,6 +63,7 @@ public final class GatewayPageLoader {
             connection = (HttpConnection) Connector.open(requestUrl, Connector.READ, true);
             connection.setRequestMethod(HttpConnection.GET);
             connection.setRequestProperty("User-Agent", "Netormium/1.0-rc21 (Java ME)");
+            if (apiToken.length() > 0) connection.setRequestProperty("Authorization", "Bearer " + apiToken);
             connection.setRequestProperty("Accept", "text/plain");
             connection.setRequestProperty("Accept-Encoding", "identity");
 
