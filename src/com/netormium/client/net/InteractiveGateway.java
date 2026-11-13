@@ -216,6 +216,7 @@ public final class InteractiveGateway {
 
     private byte[] requestBytes(String path, int maxBytes) {
         boolean retrySafe = path.startsWith("/health") ||
+            path.equals("/v1/info") ||
             path.indexOf("/v1/session/metadata") == 0 ||
             path.indexOf("/v1/session/snapshot") == 0;
         int attempts = retrySafe ? 2 : 1;
