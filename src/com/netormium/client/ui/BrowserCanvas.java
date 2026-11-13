@@ -68,7 +68,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
 
     private String currentUrl = "";
     private String pageTitle = "Netormium";
-    private String pageText = "Welcome to Netormium.\n\nChoose Open to enter a website address.\n\nThis early build displays basic page text. Chromium Gateway integration is planned for a later milestone.";
+    private String pageText = "Welcome to Netormium.\n\nChoose Open to enter a website address.\n\nWeb pages are rendered by the remote Chromium Gateway. Configure Netormium-Gateway-URL in the JAD to start browsing.";
     private String status = "Ready";
     private int scrollY = 0;
     private boolean loading = false;
@@ -299,12 +299,12 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             public void run() {
                 String gateway = interactive.healthCheck();
                 StringBuffer report = new StringBuffer();
-                report.append("Netormium 1.0 RC21\\n");
-                report.append("Screen: ").append(width).append(" x ").append(height).append("\\n");
-                report.append("Platform: ").append(platform == null ? "Unknown" : platform).append("\\n");
-                report.append("Configuration: ").append(config == null ? "Unknown" : config).append("\\n");
-                report.append("Profiles: ").append(profile == null ? "Unknown" : profile).append("\\n");
-                report.append("Gateway: ").append(gateway).append("\\n");
+                report.append("Netormium 1.0 RC21\n");
+                report.append("Screen: ").append(width).append(" x ").append(height).append("\n");
+                report.append("Platform: ").append(platform == null ? "Unknown" : platform).append("\n");
+                report.append("Configuration: ").append(config == null ? "Unknown" : config).append("\n");
+                report.append("Profiles: ").append(profile == null ? "Unknown" : profile).append("\n");
+                report.append("Gateway: ").append(gateway).append("\n");
                 final String diagnosticText = report.toString();
                 final boolean healthy = gateway.indexOf("OK") >= 0;
                 Display.getDisplay(midlet).callSerially(new Runnable() {
