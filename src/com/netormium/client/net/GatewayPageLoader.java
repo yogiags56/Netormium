@@ -11,15 +11,27 @@ import com.netormium.client.util.UrlUtil;
  * Configure GATEWAY_BASE_URL for the deployment.
  */
 public final class GatewayPageLoader {
-    private String baseUrl = "http://127.0.0.1:8787";
+    private String baseUrl = "";
 
     public void configureBaseUrl(String value) {
         if (value == null) return;
         String candidate = value.trim();
         while (candidate.endsWith("/")) candidate = candidate.substring(0, candidate.length() - 1);
-        if (candidate.startsWith("http://") || candidate.startsWith("https://")) baseUrl = candidate;
+        if (isValidBaseUrl(candidate)) baseUrl = candidate;
     }
     private static final int MAX_RESPONSE_BYTES = 65536;
+
+    private boolean isValidBaseUrl(String value) {
+        if (value == null || value.length() == 0 || value.indexOf(' ') >= 0) return false;
+        String lower = value.toLowerCase();
+        if (!lower.startsWith("http://") && !lower.startsWith("https://")) return false;
+        int schemeEnd = value.indexOf("://") + 3;
+        if (schemeEnd >= value.length()) return false;
+        String host = value.substring(schemeEnd);
+        int slash = host.indexOf('/');
+        if (slash >= 0) host = host.substring(0, slash);
+        return host.length() > 0 && host.indexOf('@') < 0;
+    }
 
     public static final class Link {
         public int index;
@@ -41,6 +53,10 @@ public final class GatewayPageLoader {
         HttpConnection connection = null;
         InputStream input = null;
         try {
+            if (baseUrl.length() == 0) {
+                page.error = "Gateway URL is not configured. Set Netormium-Gateway-URL in the JAD.";
+                return page;
+            }
             String requestUrl = baseUrl + "/v1/page?url=" + encode(targetUrl);
             connection = (HttpConnection) Connector.open(requestUrl, Connector.READ, true);
             connection.setRequestMethod(HttpConnection.GET);
