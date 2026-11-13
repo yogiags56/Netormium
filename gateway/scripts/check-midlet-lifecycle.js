@@ -8,6 +8,16 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const canvas = read('src/com/netormium/client/ui/BrowserCanvas.java');
 const state = read('src/com/netormium/client/util/BrowserStateStore.java');
 const midlet = read('src/com/netormium/client/NetormiumMIDlet.java');
+const javaFiles = [];
+function collectJava(directory) {
+  fs.readdirSync(path.join(root, directory), { withFileTypes: true }).forEach(entry => {
+    const relative = path.join(directory, entry.name);
+    if (entry.isDirectory()) collectJava(relative);
+    else if (entry.isFile() && entry.name.endsWith('.java')) javaFiles.push(read(relative));
+  });
+}
+collectJava('src');
+const javaSource = javaFiles.join('\\n');
 
 const checks = [
   ['MIDP UI callbacks use Display.callSerially', /private void postUi\([\s\S]*?Display\.getDisplay\(midlet\)\.callSerially/.test(canvas)],
