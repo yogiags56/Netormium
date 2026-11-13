@@ -105,6 +105,16 @@ const checks = [
     canvas.includes('loader.configureBaseUrl(value)') &&
     canvas.includes('showGatewaySettings()') &&
     canvas.includes('chooser.append("Gateway address", null)')],
+  ['page preferences persist Load Images and Mobile View in settings schema v3',
+    read('src/com/netormium/client/util/BrowserPreferences.java').includes('VERSION = 3') &&
+    read('src/com/netormium/client/util/BrowserPreferences.java').includes('public boolean loadImages()') &&
+    read('src/com/netormium/client/util/BrowserPreferences.java').includes('public boolean loadMobileView()') &&
+    canvas.includes('preferences.saveLoadImages(loadImagesEnabled)') &&
+    canvas.includes('preferences.saveMobileView(mobileViewEnabled)')],
+  ['page rendering preferences are passed through NTM session-open parameters',
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('&img=') &&
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('&mv=') &&
+    canvas.includes('interactive.open(url, viewportWidth, viewportHeight, useDataSaver, useImages, useMobileView)')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&
