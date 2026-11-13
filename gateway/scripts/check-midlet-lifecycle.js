@@ -115,6 +115,16 @@ const checks = [
     read('src/com/netormium/client/net/InteractiveGateway.java').includes('&img=') &&
     read('src/com/netormium/client/net/InteractiveGateway.java').includes('&mv=') &&
     canvas.includes('interactive.open(url, viewportWidth, viewportHeight, useDataSaver, useImages, useMobileView)')],
+  ['startup preference persists restore-last-page behavior with schema v4 migration',
+    read('src/com/netormium/client/util/BrowserPreferences.java').includes('VERSION = 4') &&
+    read('src/com/netormium/client/util/BrowserPreferences.java').includes('public boolean loadRestoreLastPage()') &&
+    canvas.includes('preferences.saveRestoreLastPage(restoreLastPageEnabled)') &&
+    canvas.includes('currentUrl.length() > 0 && restoreLastPageEnabled')],
+  ['Settings exposes startup behavior and shifts gateway diagnostics actions',
+    canvas.includes('Restore Last Page: On') &&
+    canvas.includes('toggleRestoreLastPage()') &&
+    canvas.includes('else if (selected == 6) showGatewaySettings();') &&
+    canvas.includes('else if (selected == 7) showDiagnostics();')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&
