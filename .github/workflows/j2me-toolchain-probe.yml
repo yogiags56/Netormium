@@ -76,12 +76,7 @@ jobs:
           -dontoptimize
           -dontobfuscate
           -microedition
-          -keep public class com.netormium.client.NetormiumMIDlet {
-              public <init>();
-              protected void startApp() throws javax.microedition.midlet.MIDletStateChangeException;
-              protected void pauseApp();
-              protected void destroyApp(boolean);
-          }
+          -keep class ** { *; }
           EOF
           "$PROGUARD_DIR/proguard.sh" @toolchain/netormium.pro
           test -s dist/Netormium.jar
@@ -113,5 +108,6 @@ jobs:
           path: |
             toolchain/ecj-help.txt
             toolchain/compiled-classes.txt
-            dist/Netormium.jar\n            dist/Netormium.jad
+            dist/Netormium.jar
+            dist/Netormium.jad
           if-no-files-found: warn
