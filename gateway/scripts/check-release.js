@@ -12,6 +12,8 @@ const client = fs.readFileSync(path.join(projectDir, 'src/com/netormium/client/n
 const snapshotClient = fs.readFileSync(path.join(projectDir, 'src/com/netormium/client/net/SnapshotLoader.java'), 'utf8');
 const legacyClient = fs.readFileSync(path.join(projectDir, 'src/com/netormium/client/net/GatewayPageLoader.java'), 'utf8');
 const jad = fs.readFileSync(path.join(projectDir, 'resources/Netormium.jad.example'), 'utf8');
+const jadVersionLine = jad.split(/\\r?\\n/).filter(line => line.indexOf('MIDlet-Version:') === 0)[0] || '';
+const jadVersion = jadVersionLine.substring('MIDlet-Version:'.length).trim();
 
 const release = pkg.version;
 const clientVersion = release;
@@ -20,8 +22,7 @@ const checks = [
   ['Gateway runtime version derives from package metadata', server.includes("require('./package.json').version") && server.includes("'GATEWAY\\t' + GATEWAY_VERSION")],
   ['Gateway health response uses the package version', server.includes("'Netormium Gateway ' + GATEWAY_VERSION + ' OK\\n'")],
   ['Java ME User-Agent', client.includes('Netormium/' + clientVersion + ' (Java ME)')],
-  ['Build and JAD use the gateway release version', build.includes('value="' + release + '"') &&
-    new RegExp('^MIDlet-Version:\\s*' + release.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\  ['JAD MIDlet version', /^MIDlet-Version:\s*1\.0\.0\s*$/m.test(jad)],') + '\\s*
+  ['Build and JAD use the gateway release version', build.includes('value="' + release + '"') && jadVersion === release],') + '\\s*
   ['JAD MIDP/CLDC profiles', jad.includes('MicroEdition-Profile: MIDP-2.0') &&
     jad.includes('MicroEdition-Configuration: CLDC-1.1')],
   ['Configurable Gateway URL property', client.includes('configureBaseUrl') &&
