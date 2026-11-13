@@ -174,7 +174,17 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         }
     }
 
-    private void runOnUiThread(final Runnable action) {\n        Display.getDisplay(midlet).callSerially(action);\n    }\n\n    private void saveCurrentTab() {
+    private void runOnUiThread(final Runnable action) {\n        Display.getDisplay(midlet).callSerially(action);\n    }\n\n    private void postUi(final int token, final String expectedSessionId, final Runnable action) {
+        Display.getDisplay(midlet).callSerially(new Runnable() {
+            public void run() {
+                if (token != requestToken) return;
+                if (expectedSessionId != null && !expectedSessionId.equals(sessionId)) return;
+                action.run();
+            }
+        });
+    }
+
+    private void saveCurrentTab() {
         tabs.updateCurrent(currentUrl, pageTitle, scrollY);
         tabs.setCurrentSessionId(sessionId);
         stateStore.save(tabs);
@@ -395,26 +405,30 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                     if (result.sessionId.length() > 0) interactive.close(result.sessionId);
                     return;
                 }
-                loading = false;
-                if (result.error != null && result.error.length() > 0) {
-                    pageTitle = "Unable to load";
-                    pageText = result.error;
-                    status = "Connection error - Open to retry";
-                    pageImage = null;
-                } else {
-                    sessionId = result.sessionId;
-                    tabs.setCurrentSessionId(sessionId);
-                    currentUrl = result.url;
-                    pageTitle = result.title.length() == 0 ? currentUrl : result.title;
-                    tabs.updateCurrent(currentUrl, pageTitle, 0);
-                    persistState();
-                    pageText = result.text;
-                    interactiveElements = result.elements;
-                    status = dataSaverEnabled ? "Interactive session · Data Saver" : "Interactive session";
-                    refreshSessionSnapshot(token, scrollY);
-                }
-                scrollY = 0;
-                repaint();
+                postUi(token, null, new Runnable() {
+                    public void run() {
+                        loading = false;
+                        if (result.error != null && result.error.length() > 0) {
+                            pageTitle = "Unable to load";
+                            pageText = result.error;
+                            status = "Connection error - Open to retry";
+                            pageImage = null;
+                        } else {
+                            sessionId = result.sessionId;
+                            tabs.setCurrentSessionId(sessionId);
+                            currentUrl = result.url;
+                            pageTitle = result.title.length() == 0 ? currentUrl : result.title;
+                            tabs.updateCurrent(currentUrl, pageTitle, 0);
+                            persistState();
+                            pageText = result.text;
+                            interactiveElements = result.elements;
+                            status = dataSaverEnabled ? "Interactive session · Data Saver" : "Interactive session";
+                            refreshSessionSnapshot(token, scrollY);
+                        }
+                        scrollY = 0;
+                        repaint();
+                    }
+                });
             }
         });
         worker.start();
@@ -453,34 +467,40 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         new Thread(new Runnable() {
             public void run() {
                 byte[] png = interactive.snapshot(id, offset);
-                if (token != requestToken || png == null || !id.equals(sessionId)) {
-                    if (png == null && token == requestToken && id.equals(sessionId)) {
-                        String error = interactive.getLastTransportError();
-                        if (!recoverExpiredSession(id, token, error)) {
-                            status = error.length() == 0 ? "Snapshot failed - check gateway" : error;
-                            repaint();
+                if (token != requestToken || !id.equals(sessionId)) return;
+                if (png == null) {
+                    final String error = interactive.getLastTransportError();
+                    postUi(token, id, new Runnable() {
+                        public void run() {
+                            if (!recoverExpiredSession(id, token, error)) {
+                                status = error.length() == 0 ? "Snapshot failed - check gateway" : error;
+                                repaint();
+                            }
                         }
-                    }
+                    });
                     return;
                 }
-                com.netormium.client.net.InteractiveGateway.Page fresh = interactive.inspect(id);
+                final com.netormium.client.net.InteractiveGateway.Page fresh = interactive.inspect(id);
                 if (token != requestToken || !id.equals(sessionId)) return;
-                if (fresh != null && fresh.error.length() > 0 &&
-                    recoverExpiredSession(id, token, fresh.error)) return;
-                if (fresh != null && fresh.error.length() == 0) {
-                    interactiveElements = fresh.elements;
-                    syncSelectedElement();
-                    inputFocused = hasFocusedInput();
-                }
-                try {
-                    // Release the previous full viewport image before decoding its replacement.
-                    pageImage = null;
-                    pageImage = Image.createImage(png, 0, png.length);
-                    status = selectedElement >= 0 ? "Element " + (selectedElement + 1) : "Interactive page";
-                } catch (Exception e) {
-                    status = "Image decode failed";
-                }
-                repaint();
+                postUi(token, id, new Runnable() {
+                    public void run() {
+                        if (fresh != null && fresh.error.length() > 0 &&
+                            recoverExpiredSession(id, token, fresh.error)) return;
+                        if (fresh != null && fresh.error.length() == 0) {
+                            interactiveElements = fresh.elements;
+                            syncSelectedElement();
+                            inputFocused = hasFocusedInput();
+                        }
+                        try {
+                            pageImage = null;
+                            pageImage = Image.createImage(png, 0, png.length);
+                            status = selectedElement >= 0 ? "Element " + (selectedElement + 1) : "Interactive page";
+                        } catch (Exception e) {
+                            status = "Image decode failed";
+                        }
+                        repaint();
+                    }
+                });
             }
         }).start();
     }
