@@ -794,7 +794,10 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             activateSelectedElement();
         } else if (keyCode == KEY_NUM0) {
             scrollY = 0;
-            repaint();
+            tabs.setCurrentScroll(scrollY);
+            stateStore.save(tabs);
+            if (sessionId.length() > 0) refreshSessionSnapshot(requestToken, scrollY);
+            else repaint();
         } else if (keyCode == KEY_NUM5) {
             activateSelectedElement();
         } else if (keyCode >= KEY_NUM1 && keyCode <= KEY_NUM9) {

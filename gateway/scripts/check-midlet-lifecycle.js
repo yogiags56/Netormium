@@ -40,6 +40,7 @@ const checks = [
   ['Java ME sources avoid post-Java-1.3 syntax',
     !javaSource.includes('StringBuilder') && !javaSource.includes('->') &&
     !javaSource.includes('<>') && !javaSource.includes('try (')],
+  ['zero key resets and persists the remote Chromium viewport', canvas.includes('} else if (keyCode == KEY_NUM0) {\n            scrollY = 0;\n            tabs.setCurrentScroll(scrollY);\n            stateStore.save(tabs);\n            if (sessionId.length() > 0) refreshSessionSnapshot(requestToken, scrollY);')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&

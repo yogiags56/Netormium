@@ -70,6 +70,7 @@ Allowed key values are `Enter`, `Tab`, `Backspace`, `Escape`, `ArrowUp`,
 - Snapshot cache lifetime: 5 seconds; global cache budget: 8 MiB; up to two
   snapshots per session.
 - Data Saver mode blocks image, media, and font requests.
+- Pressing keypad `0` resets the persisted scroll offset and requests a fresh top-of-page Chromium snapshot.
 - The MIDlet serializes interactive mutations for each active session and
   closes sessions when tabs are switched, replaced, or the MIDlet shuts down.
 

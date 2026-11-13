@@ -1,4 +1,5 @@
 ## 1.0.0-rc21 — MIDlet lifecycle and UI-thread hardening
+- Fix keypad `0` so the remote Chromium viewport, local screenshot, and persisted tab scroll position all return to the top.
 - Bound NTM/2 URL, title, text, and interactive element metadata before wire encoding; normalize invalid element kinds and coordinates.
 - Correct the browser inspiration reference in README from Opera Mini 4.3 to Opera Mini 4.5.
 - Correct the repository README release heading and replace the obsolete NTM/1-only protocol note with the implemented NTM/2 session API reference.
