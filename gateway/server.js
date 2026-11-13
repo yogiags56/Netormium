@@ -8,6 +8,7 @@ const http = require('http');
 const { chromium } = require('playwright');
 const { URL } = require('url');
 const crypto = require('crypto');
+const { isSafePublicHttpUrl } = require('./host-policy');
 const PendingNavigationRegistry = require('./pending-navigation-registry');
 const { isPngBuffer } = require('./response-validation');
 const metadataLimits = require('./metadata-limits');
@@ -33,7 +34,7 @@ let snapshotCacheBytes = 0;
 async function configurePageRoutes(page, dataSaver) {
   await page.route('**/*', async route => {
     const request = route.request();
-    if (!isPublicHttpUrl(request.url())) return route.abort();
+    if (!await isSafePublicHttpUrl(request.url())) return route.abort();
     if (dataSaver) {
       const type = request.resourceType();
       if (type === 'image' || type === 'media' || type === 'font') return route.abort();
@@ -177,7 +178,7 @@ async function sessionMetadata(item) {
 }
 
 async function createSession(rawUrl, width, height, dataSaver, requestId) {
-  if (!isPublicHttpUrl(rawUrl)) throw new Error('URL rejected by gateway policy');
+  if (!await isSafePublicHttpUrl(rawUrl)) throw new Error('URL rejected by gateway policy');
   if (sessions.size >= MAX_SESSIONS) {
     const oldest = sessions.keys().next().value;
     if (oldest) await closeSession(oldest);
@@ -236,22 +237,6 @@ function protocolResponse(status, pageUrl, title, text, links, error) {
   return lines.join('\n') + '\n';
 }
 
-function isPublicHttpUrl(raw) {
-  let u;
-  try { u = new URL(raw); } catch (_) { return false; }
-  if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
-  if (!u.hostname || u.username || u.password) return false;
-
-  const host = u.hostname.toLowerCase();
-  if (host === 'localhost' || host.endsWith('.localhost') ||
-      host.endsWith('.local') || host === '::1' ||
-      host.startsWith('127.') || host.startsWith('10.') ||
-      host.startsWith('192.168.') || host.startsWith('169.254.')) return false;
-  const m = host.match(/^172\.(\d+)\./);
-  if (m && Number(m[1]) >= 16 && Number(m[1]) <= 31) return false;
-  return true;
-}
-
 function send(res, code, body) {
   res.writeHead(code, {
     'Content-Type': 'text/plain; charset=utf-8',
@@ -270,7 +255,7 @@ async function renderSnapshot(rawUrl, width, height, scrollY) {
     const page = await context.newPage();
     page.setDefaultNavigationTimeout(NAV_TIMEOUT);
     await page.route('**/*', async route => {
-      if (!isPublicHttpUrl(route.request().url())) return route.abort();
+      if (!await isSafePublicHttpUrl(route.request().url())) return route.abort();
       return route.continue();
     });
     await page.goto(rawUrl, { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
@@ -299,7 +284,7 @@ async function render(rawUrl) {
     await page.route('**/*', async route => {
       const requestUrl = route.request().url();
       // Restrict browser subrequests to HTTP(S); block local/private hostnames too.
-      if (!isPublicHttpUrl(requestUrl)) return route.abort();
+      if (!await isSafePublicHttpUrl(requestUrl)) return route.abort();
       return route.continue();
     });
 
@@ -472,7 +457,7 @@ const server = http.createServer(async (req, res) => {
     const width = viewport.width;
     const height = viewport.height;
     const scrollY = Math.max(0, Math.min(100000, Number(requestUrl.searchParams.get('y') || 0)));
-    if (!target || target.length > MAX_URL_LENGTH || !isPublicHttpUrl(target)) {
+    if (!target || target.length > MAX_URL_LENGTH || !await isSafePublicHttpUrl(target)) {
       return send(res, 400, 'Invalid URL\\n');
     }
     try {
