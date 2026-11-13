@@ -1,3 +1,12 @@
+## 1.0.0-rc20 — Gateway network policy hardening
+- Added a dedicated Gateway host policy for HTTP(S)-only destinations.
+- Added IPv4 and IPv6 public-address classification, including IPv4-mapped IPv6 and special-use ranges.
+- Added DNS resolution checks and applied them to initial navigation and Chromium subresource routing.
+- Added regression tests for private, loopback, link-local, carrier-grade, documentation, multicast, reserved and special-use IP ranges.
+- Documented remaining DNS rebinding / network egress isolation requirements. This is defense in depth, not a production security certification.
+- MIDlet network clients now require an explicitly configured remote Gateway URL instead of silently attempting localhost on the handset.
+- Updated the legacy HTTP loader User-Agent and browser diagnostics to RC20.
+
 ## 1.0.0-rc20 — Repository integration and release identity alignment
 - Imported the 68-file RC20 source baseline into the repository root.
 - Aligned Gateway package metadata, server banner, health response, Java ME User-Agent values, and release consistency checks to RC20.
