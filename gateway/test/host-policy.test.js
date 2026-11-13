@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { isPublicIp, parsePublicHttpUrl } = require('../host-policy');
+const { isPublicIp, parsePublicHttpUrl, isSafePublicHttpUrl } = require('../host-policy');
 
 test('allows representative public IPv4 addresses', () => {
   assert.equal(isPublicIp('1.1.1.1'), true);
@@ -37,4 +37,10 @@ test('rejects non-http schemes, credentials and local hostnames', () => {
   assert.equal(parsePublicHttpUrl('http://localhost'), null);
   assert.equal(parsePublicHttpUrl('http://router.local'), null);
   assert.ok(parsePublicHttpUrl('https://example.com'));
+});
+
+test('asynchronous policy rejects literal private targets before navigation', async () => {
+  assert.equal(await isSafePublicHttpUrl('http://127.0.0.1/'), false);
+  assert.equal(await isSafePublicHttpUrl('http://[::1]/'), false);
+  assert.equal(await isSafePublicHttpUrl('file:///etc/passwd'), false);
 });
