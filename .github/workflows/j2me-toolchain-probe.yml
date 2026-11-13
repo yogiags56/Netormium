@@ -67,7 +67,8 @@ jobs:
           PROGUARD_DIR="$(find toolchain/proguard -type f -name proguard.sh -print -quit | xargs -r dirname)"
           test -n "$PROGUARD_DIR"
           jar --create --file build/Netormium-unverified.jar -C build/classes .
-          printf 'Manifest-Version: 1.0\r\nMIDlet-Name: Netormium\r\nMIDlet-Version: 1.0.0\r\nMIDlet-Vendor: Netormium Project\r\nMIDlet-1: Netormium,,com.netormium.client.NetormiumMIDlet\r\nMicroEdition-Profile: MIDP-2.0\r\nMicroEdition-Configuration: CLDC-1.1\r\n\r\n' > toolchain/Netormium-MANIFEST.MF
+          APP_VERSION="$(node -p "require('./gateway/package.json').version")"
+          printf 'Manifest-Version: 1.0\r\nMIDlet-Name: Netormium\r\nMIDlet-Version: %s\r\nMIDlet-Vendor: Netormium Project\r\nMIDlet-1: Netormium,,com.netormium.client.NetormiumMIDlet\r\nMicroEdition-Profile: MIDP-2.0\r\nMicroEdition-Configuration: CLDC-1.1\r\n\r\n' "$APP_VERSION" > toolchain/Netormium-MANIFEST.MF
           cat > toolchain/netormium.pro <<EOF
           -injars $GITHUB_WORKSPACE/build/Netormium-unverified.jar
           -outjars $GITHUB_WORKSPACE/dist/Netormium.jar
