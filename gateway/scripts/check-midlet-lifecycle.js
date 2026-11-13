@@ -26,7 +26,10 @@ const checks = [
   ['new tab closes previous remote session', /private void createTab\(\)[\s\S]*?closeSession\(\);/.test(canvas)],
   ['MIDlet shutdown closes browser session', /public void shutdown\(\)[\s\S]*?closeSession\(\);/.test(canvas) && /destroyApp\(boolean unconditional\)[\s\S]*?browser\.shutdown\(\)/.test(midlet)],
   ['RMS v2 no longer writes server session IDs', /VERSION = 2/.test(state) && !/writeUTF\(limit\(tab\.sessionId/.test(state)],
-  ['RMS v1 migration consumes and discards old session IDs', /version == 1\) in\.readUTF\(\)/.test(state)]
+  ['RMS v1 migration consumes and discards old session IDs', /version == 1\\) in\\.readUTF\\(\\)/.test(state)],
+  ['worker results captured by UI callbacks are final', /final com\\.netormium\\.client\\.net\\.InteractiveGateway\\.Page result = interactive\\.type/.test(canvas) && /final com\\.netormium\\.client\\.net\\.InteractiveGateway\\.Page result = interactive\\.tap/.test(canvas) && /final com\\.netormium\\.client\\.net\\.InteractiveGateway\\.Page result = interactive\\.key/.test(canvas)],
+  ['snapshot callback payloads are final', /final byte\\[\\] png = interactive\\.snapshot/.test(canvas) && /final com\\.netormium\\.client\\.net\\.InteractiveGateway\\.Page fresh = interactive\\.inspect/.test(canvas)],
+  ['Java ME sources avoid post-Java-1.3 syntax', !/new\\s+[A-Za-z0-9_.<>]+\\s*<>\\s*\\(|\\bStringBuilder\\b|try\\s*\\([^)]*\\)|->/.test(javaSource) && !/for\\s*\\(\\s*[^;:]+:\\s*[^)]+\\)/.test(javaSource)]
 ];
 
 let failed = false;
