@@ -32,14 +32,13 @@ const SNAPSHOT_CACHE_MAX_BYTES = 8 * 1024 * 1024;
 const SNAPSHOT_CACHE_MAX_ENTRIES_PER_SESSION = 2;
 let snapshotCacheBytes = 0;
 
-async function configurePageRoutes(page, dataSaver) {
+async function configurePageRoutes(page, dataSaver, loadImages) {
   await page.route('**/*', async route => {
     const request = route.request();
     if (!await isSafePublicHttpUrl(request.url())) return route.abort();
-    if (dataSaver) {
-      const type = request.resourceType();
-      if (type === 'image' || type === 'media' || type === 'font') return route.abort();
-    }
+    const type = request.resourceType();
+    if (!loadImages && type === 'image') return route.abort();
+    if (dataSaver && (type === 'image' || type === 'media' || type === 'font')) return route.abort();
     return route.continue();
   });
 }
@@ -164,7 +163,7 @@ async function sessionMetadata(item) {
   return sessionProtocol.metadataResponse(item, data);
 }
 
-async function createSession(rawUrl, width, height, dataSaver, requestId) {
+async function createSession(rawUrl, width, height, dataSaver, loadImages, mobileView, requestId) {
   if (!await isSafePublicHttpUrl(rawUrl)) throw new Error('URL rejected by gateway policy');
   if (sessions.size >= MAX_SESSIONS) {
     const oldest = sessions.keys().next().value;
@@ -179,18 +178,20 @@ async function createSession(rawUrl, width, height, dataSaver, requestId) {
   try {
     context = await browser.newContext({
       viewport: { width, height }, deviceScaleFactor: 1,
+      ...(mobileView ? { isMobile: true, hasTouch: true,
+        userAgent: 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36' } : {}),
       javaScriptEnabled: true, acceptDownloads: false, serviceWorkers: 'block'
     });
     if (cancelled) throw new Error('Navigation cancelled by client');
     const page = await context.newPage();
     page.setDefaultNavigationTimeout(NAV_TIMEOUT);
-    await configurePageRoutes(page, dataSaver);
+    await configurePageRoutes(page, dataSaver, loadImages);
     await page.goto(rawUrl, { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
     if (cancelled) throw new Error('Navigation cancelled by client');
     await page.waitForTimeout(500);
     if (cancelled) throw new Error('Navigation cancelled by client');
     const id = crypto.randomBytes(12).toString('hex');
-    const item = { id, context, page, dataSaver: !!dataSaver, lastUsed: Date.now(), snapshotCache: new Map() };
+    const item = { id, context, page, dataSaver: !!dataSaver, loadImages: !!loadImages, mobileView: !!mobileView, lastUsed: Date.now(), snapshotCache: new Map() };
     sessions.set(id, item);
     return item;
   } catch (error) {
@@ -336,8 +337,10 @@ const server = http.createServer(async (req, res) => {
     try {
       if (!target || target.length > MAX_URL_LENGTH) return send(res, 400, 'Invalid URL\n');
       const dataSaver = requestUrl.searchParams.get('ds') === '1';
+      const loadImages = requestUrl.searchParams.get('img') !== '0';
+      const mobileView = requestUrl.searchParams.get('mv') === '1';
       const requestId = requestUrl.searchParams.get('rid') || '';
-      const item = await createSession(target, width, height, dataSaver, requestId);
+      const item = await createSession(target, width, height, dataSaver, loadImages, mobileView, requestId);
       return send(res, 200, await sessionMetadata(item));
     } catch (error) {
       return send(res, 502, sessionErrorResponse(error && error.message ? error.message : error));
