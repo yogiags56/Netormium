@@ -423,7 +423,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private void showAbout() {
         final Display display = Display.getDisplay(midlet);
         final Alert alert = new Alert("About Netormium",
-            "Netormium\nBrowser version: 1.0.0-rc21\nGateway version: Checking...\nChromium version: Checking...\nConnection: Checking...\n\nChromium-assisted J2ME browser.",
+            "Netormium\nBrowser version: 1.0.0-rc21\nPlatform: MIDP-2.0 / CLDC-1.1\nGateway version: Checking...\nChromium version: Checking...\nConnection: Checking...\n\nRemote Chromium rendering for Java ME phones.",
             null, AlertType.INFO);
         alert.setTimeout(Alert.FOREVER);
         display.setCurrent(alert, this);
@@ -433,7 +433,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                 display.callSerially(new Runnable() {
                     public void run() {
                         alert.setString("Netormium\nBrowser version: 1.0.0-rc21\n" +
-                            runtimeInfo + "\n\nChromium-assisted J2ME browser.");
+                            "Platform: MIDP-2.0 / CLDC-1.1\n" + runtimeInfo +
+                            "\n\nRemote Chromium rendering for Java ME phones.");
                     }
                 });
             }
