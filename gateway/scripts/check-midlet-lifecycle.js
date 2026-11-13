@@ -130,6 +130,12 @@ const checks = [
     canvas.includes('g.fillRoundRect(5, searchY, width - 10, searchHeight, 7, 7)') &&
     canvas.includes('if (dial == -2) { showAddressBox(); return; }') &&
     canvas.includes('int sectionY = searchY + searchHeight + 10;')],
+  ['Start Page exposes Bookmarks and History shortcuts with touch navigation',
+    canvas.includes('g.drawString("Bookmarks"') &&
+    canvas.includes('g.drawString("History"') &&
+    canvas.includes('if (dial == -3) { showBookmarks(); return; }') &&
+    canvas.includes('if (dial == -4) { showHistory(); return; }') &&
+    canvas.includes('int shortcutY = searchY + searchHeight + 6;')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&
