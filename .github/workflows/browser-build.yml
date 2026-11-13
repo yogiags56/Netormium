@@ -60,6 +60,13 @@ jobs:
           set -o pipefail
           npm run check:release 2>&1 | tee ../browser-build-report/release-consistency.log
 
+      - name: MIDlet lifecycle source checks
+        working-directory: gateway
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run check:midlet-lifecycle 2>&1 | tee ../browser-build-report/midlet-lifecycle.log
+
       - name: Ant project diagnostics
         run: ant -projecthelp
 
