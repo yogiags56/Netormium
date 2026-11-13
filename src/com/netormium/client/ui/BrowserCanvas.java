@@ -40,6 +40,9 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private String[] speedDialUrls = new String[0];
     private int selectedSpeedDial = -1;
     private int startPageSelection = 0;
+    private boolean mainMenuOpen = false;
+    private int mainMenuSelection = 0;
+    private int mainMenuScroll = 0;
     private final Command renameSpeedDialCommand = new Command("Rename", Command.SCREEN, 1);
     private final Command deleteSpeedDialCommand = new Command("Delete", Command.SCREEN, 2);
     private final Command moveSpeedDialUpCommand = new Command("Move Up", Command.SCREEN, 3);
@@ -310,28 +313,92 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         }
     }
 
+    private String[] mainMenuItems() {
+        String[] items = new String[17];
+        items[0] = "Open address";
+        items[1] = "Start page";
+        items[2] = "Tabs";
+        items[3] = "New tab";
+        items[4] = "Speed Dial";
+        items[5] = "Add to Speed Dial";
+        items[6] = "Bookmarks";
+        items[7] = "Add bookmark";
+        items[8] = "History";
+        items[9] = "Reload page";
+        items[10] = "Forward";
+        items[11] = dataSaverEnabled ? "Data Saver: On" : "Data Saver: Off";
+        items[12] = "Settings";
+        items[13] = "Page information";
+        items[14] = "Diagnostics";
+        items[15] = "About Netormium";
+        items[16] = "Exit";
+        return items;
+    }
+
     private void showMainMenu() {
-        chooser = new List("Netormium Menu", List.IMPLICIT);
-        chooser.append("Open address", null);
-        chooser.append("Start page", null);
-        chooser.append("Tabs", null);
-        chooser.append("New tab", null);
-        chooser.append("Speed Dial", null);
-        chooser.append("Add to Speed Dial", null);
-        chooser.append("Bookmarks", null);
-        chooser.append("Add bookmark", null);
-        chooser.append("History", null);
-        chooser.append("Reload page", null);
-        chooser.append("Forward", null);
-        chooser.append(dataSaverEnabled ? "Data Saver: On" : "Data Saver: Off", null);
-        chooser.append("Settings", null);
-        chooser.append("Page information", null);
-        chooser.append("Diagnostics", null);
-        chooser.append("About Netormium", null);
-        chooser.append("Exit", null);
-        chooser.addCommand(new Command("Back", Command.BACK, 1));
-        chooser.setCommandListener(this);
-        Display.getDisplay(midlet).setCurrent(chooser);
+        mainMenuOpen = true;
+        mainMenuSelection = 0;
+        mainMenuScroll = 0;
+        Display.getDisplay(midlet).setCurrent(this);
+        repaint();
+    }
+
+    private void closeMainMenu() {
+        mainMenuOpen = false;
+        repaint();
+    }
+
+    private void paintMainMenu(Graphics g, int width, int height, Font body) {
+        int headerHeight = Math.max(22, body.getHeight() + 10);
+        int footerHeight = Math.max(18, body.getHeight() + 7);
+        int x = 3;
+        int panelWidth = width - 6;
+        int top = 2;
+        int bottom = height - footerHeight - 2;
+        g.setColor(0xFFFFFF);
+        g.fillRect(x, top, panelWidth, bottom - top);
+        g.setColor(0x526F89);
+        g.drawRect(x, top, panelWidth - 1, bottom - top - 1);
+        g.setColor(0x244D70);
+        g.fillRect(x + 1, top + 1, panelWidth - 2, headerHeight);
+        g.setFont(body);
+        g.setColor(0xFFFFFF);
+        g.drawString("Netormium", x + 6, top + headerHeight / 2,
+            Graphics.LEFT | Graphics.VCENTER);
+        String[] items = mainMenuItems();
+        int rowHeight = Math.max(19, body.getHeight() + 5);
+        int listTop = top + headerHeight + 2;
+        int listBottom = bottom - 2;
+        int visibleRows = Math.max(1, (listBottom - listTop) / rowHeight);
+        if (mainMenuSelection < mainMenuScroll) mainMenuScroll = mainMenuSelection;
+        if (mainMenuSelection >= mainMenuScroll + visibleRows) {
+            mainMenuScroll = mainMenuSelection - visibleRows + 1;
+        }
+        for (int row = 0; row < visibleRows; row++) {
+            int index = mainMenuScroll + row;
+            if (index >= items.length) break;
+            int y = listTop + row * rowHeight;
+            if (index == mainMenuSelection) {
+                g.setColor(0x2879B9);
+                g.fillRect(x + 2, y, panelWidth - 4, rowHeight);
+                g.setColor(0xFFFFFF);
+            } else {
+                g.setColor(0x263B4D);
+            }
+            g.drawString(items[index], x + 8, y + rowHeight / 2,
+                Graphics.LEFT | Graphics.VCENTER);
+            if (index == 11) {
+                g.drawString(dataSaverEnabled ? "ON" : "OFF",
+                    width - 10, y + rowHeight / 2, Graphics.RIGHT | Graphics.VCENTER);
+            }
+        }
+        g.setColor(0x244D70);
+        g.fillRect(0, height - footerHeight, width, footerHeight);
+        g.setColor(0xFFFFFF);
+        g.drawString("Select", 5, height - footerHeight / 2,
+            Graphics.LEFT | Graphics.VCENTER);
+        g.drawString("Back", width - 5, height - footerHeight / 2,
+            Graphics.RIGHT | Graphics.VCENTER);
     }
 
     private void handleMainMenuSelection(int selected) {
@@ -1070,6 +1137,11 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         }
         g.setClip(0, 0, w, h);
 
+        if (mainMenuOpen) {
+            paintMainMenu(g, w, h, body);
+            return;
+        }
+
         g.setColor(0x244D70);
         g.fillRect(0, footerY, w, footerH);
         g.setColor(0x102F4B);
@@ -1201,6 +1273,26 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     }
 
     protected void pointerPressed(int x, int y) {
+        if (mainMenuOpen) {
+            int footerHeight = Math.max(18, ThemeManager.getBodyFont(
+                new ScreenMetrics(getWidth(), getHeight())).getHeight() + 7);
+            if (y >= getHeight() - footerHeight && x >= getWidth() / 2) {
+                closeMainMenu();
+                return;
+            }
+            Font body = ThemeManager.getBodyFont(new ScreenMetrics(getWidth(), getHeight()));
+            int headerHeight = Math.max(22, body.getHeight() + 10);
+            int rowHeight = Math.max(19, body.getHeight() + 5);
+            int listTop = 2 + headerHeight + 2;
+            int index = mainMenuScroll + ((y - listTop) / rowHeight);
+            String[] items = mainMenuItems();
+            if (y >= listTop && index >= 0 && index < items.length) {
+                mainMenuSelection = index;
+                mainMenuOpen = false;
+                handleMainMenuSelection(index);
+            }
+            return;
+        }
         ScreenMetrics metrics = new ScreenMetrics(getWidth(), getHeight());
         AdaptiveLayout layout = new AdaptiveLayout(metrics);
         int top = layout.getAddressBarHeight() + 3;
@@ -1225,6 +1317,23 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
 
     protected void keyPressed(int keyCode) {
         int action = getGameAction(keyCode);
+        if (mainMenuOpen) {
+            String[] items = mainMenuItems();
+            if (action == UP) {
+                if (mainMenuSelection > 0) mainMenuSelection--;
+                repaint();
+            } else if (action == DOWN) {
+                if (mainMenuSelection + 1 < items.length) mainMenuSelection++;
+                repaint();
+            } else if (action == FIRE || keyCode == KEY_NUM5) {
+                int selected = mainMenuSelection;
+                mainMenuOpen = false;
+                handleMainMenuSelection(selected);
+            } else if (keyCode == KEY_NUM0 || keyCode == KEY_NUM_STAR) {
+                closeMainMenu();
+            }
+            return;
+        }
         if (currentUrl.length() == 0 && pageImage == null) {
             SpeedDialStore.Entry[] homeItems = speedDial.all();
             int columns = getWidth() >= 220 ? 3 : 2;
