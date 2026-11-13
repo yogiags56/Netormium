@@ -300,12 +300,18 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                 report.append("Configuration: ").append(config == null ? "Unknown" : config).append("\\n");
                 report.append("Profiles: ").append(profile == null ? "Unknown" : profile).append("\\n");
                 report.append("Gateway: ").append(gateway).append("\\n");
-                Alert alert = new Alert("Diagnostics", report.toString(), null,
-                    gateway.indexOf("OK") >= 0 ? AlertType.INFO : AlertType.WARNING);
-                alert.setTimeout(Alert.FOREVER);
-                Display.getDisplay(midlet).setCurrent(alert, BrowserCanvas.this);
-                status = "Diagnostics complete";
-                repaint();
+                final String diagnosticText = report.toString();
+                final boolean healthy = gateway.indexOf("OK") >= 0;
+                Display.getDisplay(midlet).callSerially(new Runnable() {
+                    public void run() {
+                        Alert alert = new Alert("Diagnostics", diagnosticText, null,
+                            healthy ? AlertType.INFO : AlertType.WARNING);
+                        alert.setTimeout(Alert.FOREVER);
+                        Display.getDisplay(midlet).setCurrent(alert, BrowserCanvas.this);
+                        status = "Diagnostics complete";
+                        repaint();
+                    }
+                });
             }
         }).start();
     }
@@ -778,17 +784,24 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         repaint();
         new Thread(new Runnable() {
             public void run() {
-                byte[] png = snapshotLoader.load(url, width, height, offset);
-                if (token != requestToken || png == null) return;
-                try {
-                    // Release the previous full viewport image before decoding its replacement.
-                    pageImage = null;
-                    pageImage = Image.createImage(png, 0, png.length);
-                    status = "Visual page";
-                } catch (Exception e) {
-                    status = "Snapshot failed";
-                }
-                repaint();
+                final byte[] png = snapshotLoader.load(url, width, height, offset);
+                if (token != requestToken) return;
+                postUi(token, null, new Runnable() {
+                    public void run() {
+                        if (png == null) {
+                            status = "Snapshot failed - check gateway";
+                        } else {
+                            try {
+                                pageImage = null;
+                                pageImage = Image.createImage(png, 0, png.length);
+                                status = "Visual page";
+                            } catch (Exception e) {
+                                status = "Snapshot failed";
+                            }
+                        }
+                        repaint();
+                    }
+                });
             }
         }).start();
     }
