@@ -14,6 +14,7 @@ const { isPngBuffer } = require('./response-validation');
 const metadataLimits = require('./metadata-limits');
 const viewportLimits = require('./viewport-limits');
 const sessionProtocol = require('./session-protocol');
+const GATEWAY_VERSION = require('./package.json').version;
 
 const HOST = process.env.HOST || '127.0.0.1';
 const PORT = Number(process.env.PORT || 8787);
@@ -317,12 +318,12 @@ async function render(rawUrl) {
 const server = http.createServer(async (req, res) => {
   const requestUrl = new URL(req.url, 'http://' + req.headers.host);
   if (req.method === 'GET' && requestUrl.pathname === '/health') {
-    return send(res, 200, 'Netormium Gateway 1.0 RC21 OK\n');
+    return send(res, 200, 'Netormium Gateway ' + GATEWAY_VERSION + ' OK\n');
   }
   if (req.method === 'GET' && requestUrl.pathname === '/v1/info') {
     return send(res, 200,
       'NTMINFO/1\n' +
-      'GATEWAY\t1.0.0-rc21\n' +
+      'GATEWAY\t' + GATEWAY_VERSION + '\n' +
       'CHROMIUM\t' + browser.version() + '\n' +
       'END\n');
   }
