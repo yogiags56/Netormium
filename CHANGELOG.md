@@ -1,5 +1,6 @@
 ## 1.0.0-rc21 — MIDlet lifecycle and UI-thread hardening
 - Repackage ProGuard-preverified classes with a single complete MIDP 2.0 / CLDC 1.1 manifest, avoiding duplicate manifest sections before JAD validation.
+- Validate final JAR manifest attributes through direct ZIP streaming so CI does not depend on JAR extraction behavior for the special manifest entry.
 - Refactor bookmark duplicate detection to avoid an ECJ-generated exception-handler stack merge that ProGuard 7.10.0 cannot preverify.
 - Fix keypad `0` so the remote Chromium viewport, local screenshot, and persisted tab scroll position all return to the top.
 - Bound NTM/2 URL, title, text, and interactive element metadata before wire encoding; normalize invalid element kinds and coordinates.
