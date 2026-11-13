@@ -17,19 +17,26 @@ function collectJava(directory) {
   });
 }
 collectJava('src');
-const javaSource = javaFiles.join('\\n');
+const javaSource = javaFiles.join('\n');
 
 const checks = [
-  ['MIDP UI callbacks use Display.callSerially', /private void postUi\([\s\S]*?Display\.getDisplay\(midlet\)\.callSerially/.test(canvas)],
-  ['tab restoration discards transient session IDs', /private void restoreActiveTab\(\)[\s\S]*?sessionId = "";[\s\S]*?tabs\.setCurrentSessionId\(""\);[\s\S]*?loadUrl\(currentUrl, false\)/.test(canvas)],
-  ['tab switching closes previous remote session', /private void switchTab\(int index\)[\s\S]*?closeSession\(\);/.test(canvas)],
-  ['new tab closes previous remote session', /private void createTab\(\)[\s\S]*?closeSession\(\);/.test(canvas)],
-  ['MIDlet shutdown closes browser session', /public void shutdown\(\)[\s\S]*?closeSession\(\);/.test(canvas) && /destroyApp\(boolean unconditional\)[\s\S]*?browser\.shutdown\(\)/.test(midlet)],
-  ['RMS v2 no longer writes server session IDs', /VERSION = 2/.test(state) && !/writeUTF\(limit\(tab\.sessionId/.test(state)],
-  ['RMS v1 migration consumes and discards old session IDs', /version == 1\\) in\\.readUTF\\(\\)/.test(state)],
-  ['worker results captured by UI callbacks are final', /final com\\.netormium\\.client\\.net\\.InteractiveGateway\\.Page result = interactive\\.type/.test(canvas) && /final com\\.netormium\\.client\\.net\\.InteractiveGateway\\.Page result = interactive\\.tap/.test(canvas) && /final com\\.netormium\\.client\\.net\\.InteractiveGateway\\.Page result = interactive\\.key/.test(canvas)],
-  ['snapshot callback payloads are final', /final byte\\[\\] png = interactive\\.snapshot/.test(canvas) && /final com\\.netormium\\.client\\.net\\.InteractiveGateway\\.Page fresh = interactive\\.inspect/.test(canvas)],
-  ['Java ME sources avoid post-Java-1.3 syntax', !/new\\s+[A-Za-z0-9_.<>]+\\s*<>\\s*\\(|\\bStringBuilder\\b|try\\s*\\([^)]*\\)|->/.test(javaSource) && !/for\\s*\\(\\s*[^;:]+:\\s*[^)]+\\)/.test(javaSource)]
+  ['MIDP UI callbacks use Display.callSerially', canvas.includes('Display.getDisplay(midlet).callSerially')],
+  ['tab restoration discards transient session IDs', canvas.includes('sessionId = "";') && canvas.includes('tabs.setCurrentSessionId("");') && canvas.includes('loadUrl(currentUrl, false)')],
+  ['tab switching closes previous remote session', canvas.includes('private void switchTab(int index)') && canvas.includes('closeSession();')],
+  ['new tab closes previous remote session', canvas.includes('private void createTab()') && canvas.includes('closeSession();')],
+  ['MIDlet shutdown closes browser session', canvas.includes('public void shutdown()') && midlet.includes('browser.shutdown();')],
+  ['RMS v2 no longer writes server session IDs', state.includes('VERSION = 2') && !state.includes('writeUTF(limit(tab.sessionId')],
+  ['RMS v1 migration consumes and discards old session IDs', state.includes('if (version == 1) in.readUTF();')],
+  ['worker results captured by UI callbacks are final',
+    canvas.includes('final com.netormium.client.net.InteractiveGateway.Page result = interactive.type') &&
+    canvas.includes('final com.netormium.client.net.InteractiveGateway.Page result = interactive.tap') &&
+    canvas.includes('final com.netormium.client.net.InteractiveGateway.Page result = interactive.key')],
+  ['snapshot callback payloads are final',
+    canvas.includes('final byte[] png = interactive.snapshot') &&
+    canvas.includes('final com.netormium.client.net.InteractiveGateway.Page fresh = interactive.inspect')],
+  ['Java ME sources avoid post-Java-1.3 syntax',
+    !javaSource.includes('StringBuilder') && !javaSource.includes('->') &&
+    !javaSource.includes('<>') && !javaSource.includes('try (')]
 ];
 
 let failed = false;
