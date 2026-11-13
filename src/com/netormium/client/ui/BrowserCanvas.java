@@ -22,7 +22,7 @@ import com.netormium.client.util.BrowserStateStore;
 import com.netormium.client.util.HistoryStore;
 import com.netormium.client.util.BrowserPreferences;
 
-/** Netormium RC20 browser canvas with keypad navigation and remote Chromium snapshots. */
+/** Netormium RC21 browser canvas with keypad navigation and remote Chromium snapshots. */
 public final class BrowserCanvas extends Canvas implements CommandListener {
     private final NetormiumMIDlet midlet;
     private final BrowserHistory history = new BrowserHistory(100);
@@ -299,7 +299,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             public void run() {
                 String gateway = interactive.healthCheck();
                 StringBuffer report = new StringBuffer();
-                report.append("Netormium 1.0 RC20\\n");
+                report.append("Netormium 1.0 RC21\\n");
                 report.append("Screen: ").append(width).append(" x ").append(height).append("\\n");
                 report.append("Platform: ").append(platform == null ? "Unknown" : platform).append("\\n");
                 report.append("Configuration: ").append(config == null ? "Unknown" : config).append("\\n");
@@ -384,7 +384,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         currentUrl = "";
         tabs.updateCurrent("", "New Tab", 0);
         pageTitle = "Netormium";
-        pageText = "Welcome to Netormium 1.0 RC20.\n\nChoose Open to enter a website address.\n\nPages are rendered by the remote Chromium Gateway.\n\nConfigure Netormium-Gateway-URL in the JAD before browsing.";
+        pageText = "Welcome to Netormium 1.0 RC21.\n\nChoose Open to enter a website address.\n\nPages are rendered by the remote Chromium Gateway.\n\nConfigure Netormium-Gateway-URL in the JAD before browsing.";
         status = "Home";
         scrollY = 0;
         repaint();
