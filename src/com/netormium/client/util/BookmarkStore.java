@@ -116,7 +116,11 @@ public final class BookmarkStore {
             return false;
         }
         if (en != null) en.destroy();
-        if (rs != null) rs.closeRecordStore();
+        if (rs != null) {
+            try {
+                rs.closeRecordStore();
+            } catch (Exception ignored) {}
+        }
         return false;
     }
 
