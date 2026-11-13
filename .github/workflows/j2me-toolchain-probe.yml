@@ -25,7 +25,7 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Download pinned Java ME API stubs
+      - name: Download Java ME API stubs
         shell: bash
         run: |
           set -euo pipefail
@@ -36,35 +36,74 @@ jobs:
           jar tf toolchain/midpapi20.jar | grep -Fx 'javax/microedition/midlet/MIDlet.class'
           jar tf toolchain/midpapi20.jar | grep -Fx 'javax/microedition/lcdui/Canvas.class'
 
-      - name: Download and verify Eclipse ECJ 4.41
+      - name: Download legacy Eclipse ECJ 3.7.2
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p toolchain
-          curl --fail --location --retry 3 --output toolchain/ecj-4.41.jar https://download.eclipse.org/eclipse/downloads/drops4/R-4.41-202608281142/ecj-4.41.jar
-          echo "080bb403adb3b88b5b5f382388922425de5274f7729f0a94702f0e2a516c7d13c6740faab1cb20786b1dda0c5da933aa9b842f7c64867414ff75fa668ea06b09  toolchain/ecj-4.41.jar" | sha512sum --check
-          java -cp toolchain/ecj-4.41.jar org.eclipse.jdt.compiler.batch.BatchCompiler -help > toolchain/ecj-help.txt 2>&1
-          grep -E -- '-1\.3|--source' toolchain/ecj-help.txt
+          curl --fail --location --retry 3 --output toolchain-ecj.jar https://repo.maven.apache.org/maven2/org/eclipse/jdt/core/compiler/ecj/3.7.2/ecj-3.7.2.jar
+          jar tf toolchain-ecj.jar | grep -Fx 'org/eclipse/jdt/internal/compiler/batch/Main.class'
 
-      - name: Compile all MIDlet sources
+      - name: Compile all MIDlet sources for CLDC 1.1
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p build/classes
-          find src -name '*.java' -print0 | xargs -0 java -cp toolchain/ecj-4.41.jar org.eclipse.jdt.compiler.batch.BatchCompiler \
+          find src -name '*.java' -print0 | xargs -0 java -cp toolchain-ecj.jar org.eclipse.jdt.internal.compiler.batch.Main \
             -1.3 -encoding UTF-8 \
             -bootclasspath toolchain/cldcapi11.jar:toolchain/midpapi20.jar \
             -d build/classes
           test -n "$(find build/classes -name '*.class' -print -quit)"
-          find build/classes -name '*.class' | sort > toolchain/compiled-classes.txt
-          echo "Compiled class count: $(wc -l < toolchain/compiled-classes.txt)"
+          find build/classes -name '*.class' | sort > compiled-classes.txt
+          echo "Compiled class count: $(wc -l < compiled-classes.txt)"
 
-      - name: Archive compile-only diagnostic
+      - name: Probe ProGuard 5.3.3 preverification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          curl --fail --location --retry 3 --output proguard-base.jar https://repo.maven.apache.org/maven2/net/sf/proguard/proguard-base/5.3.3/proguard-base-5.3.3.jar
+          jar tf proguard-base.jar | grep -E '^proguard/ProGuard.class$'
+          jar --create --file unverified.jar -C build/classes .
+          cat > proguard.pro <<EOF
+          -injars unverified.jar
+          -outjars dist/Netormium.jar
+          -libraryjars toolchain/cldcapi11.jar
+          -libraryjars toolchain/midpapi20.jar
+          -dontshrink
+          -dontoptimize
+          -dontobfuscate
+          -microedition
+          -keep class ** { *; }
+          EOF
+          java -jar proguard-base.jar @proguard.pro
+          test -s dist/Netormium.jar
+          jar tf dist/Netormium.jar | grep -Fx 'com/netormium/client/NetormiumMIDlet.class'
+          if jar tf dist/Netormium.jar | grep -q '^javax/microedition/'; then
+            echo "Java ME API classes must not be bundled in MIDlet JAR" >&2
+            exit 1
+          fi
+          cp resources/Netormium.jad.example dist/Netormium.jad
+          JAR_SIZE="$(wc -c < dist/Netormium.jar | tr -d ' ')"
+          sed -i "s/^MIDlet-Jar-Size: .*/MIDlet-Jar-Size: $JAR_SIZE/" dist/Netormium.jad
+          node gateway/scripts/check-midlet-package.js dist/Netormium.jar dist/Netormium.jad
+
+      - name: Upload Alpha package
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: netormium-alpha-midlet-package
+          path: |
+            dist/Netormium.jar
+            dist/Netormium.jad
+          if-no-files-found: error
+
+      - name: Archive diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: netormium-alpha-compile-probe
+          name: netormium-alpha-toolchain-diagnostics
           path: |
-            toolchain/ecj-help.txt
-            toolchain/compiled-classes.txt
+            compiled-classes.txt
+            dist/Netormium.jar
+            dist/Netormium.jad
           if-no-files-found: warn
