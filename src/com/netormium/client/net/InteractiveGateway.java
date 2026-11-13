@@ -81,6 +81,11 @@ public final class InteractiveGateway {
     }
 
     public Page open(String url, int width, int height, boolean dataSaver) {
+        return open(url, width, height, dataSaver, true, false);
+    }
+
+    public Page open(String url, int width, int height, boolean dataSaver,
+                     boolean loadImages, boolean mobileView) {
         String requestId;
         synchronized (this) {
             openSequence++;
@@ -90,6 +95,8 @@ public final class InteractiveGateway {
         try {
             return requestPage("/v1/session/open?url=" + encode(url) +
                 "&w=" + width + "&h=" + height + "&ds=" + (dataSaver ? "1" : "0") +
+                "&img=" + (loadImages ? "1" : "0") +
+                "&mv=" + (mobileView ? "1" : "0") +
                 "&rid=" + encode(requestId));
         } finally {
             synchronized (this) {
