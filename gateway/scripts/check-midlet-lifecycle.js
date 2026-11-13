@@ -49,15 +49,18 @@ const checks = [
     loadWorker.length > 0 && !loadWorker.includes('getWidth()') && !loadWorker.includes('getHeight()')],
   ['interactive transport rejects oversized declared response bodies',
     read('src/com/netormium/client/net/InteractiveGateway.java').includes('long declaredLength = connection.getLength();') &&
-    read('src/com/netormium/client/net/InteractiveGateway.java').includes('if (declaredLength > maxBytes)')],
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('if (declaredLength > maxBytes)') &&
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('new ByteArrayOutputStream(4096)')],
   ['interactive transport guarantees progress on zero-byte reads',
     read('src/com/netormium/client/net/InteractiveGateway.java').includes('int single = input.read();')],
   ['PNG snapshot transport enforces declared and streamed byte limits',
     read('src/com/netormium/client/net/SnapshotLoader.java').includes('if (declaredLength > MAX_IMAGE_BYTES)') &&
-    read('src/com/netormium/client/net/SnapshotLoader.java').includes('if (total > MAX_IMAGE_BYTES)')],
+    read('src/com/netormium/client/net/SnapshotLoader.java').includes('if (total > MAX_IMAGE_BYTES)') &&
+    read('src/com/netormium/client/net/SnapshotLoader.java').includes('new ByteArrayOutputStream(4096)')],
   ['legacy page transport enforces declared and streamed byte limits',
     read('src/com/netormium/client/net/GatewayPageLoader.java').includes('if (declaredLength > MAX_RESPONSE_BYTES)') &&
-    read('src/com/netormium/client/net/GatewayPageLoader.java').includes('if (total > MAX_RESPONSE_BYTES)')]
+    read('src/com/netormium/client/net/GatewayPageLoader.java').includes('if (total > MAX_RESPONSE_BYTES)') &&
+    read('src/com/netormium/client/net/GatewayPageLoader.java').includes('new ByteArrayOutputStream(4096)')]
 ];
 
 let failed = false;
