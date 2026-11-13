@@ -93,30 +93,50 @@ public final class SpeedDialStore {
     public boolean rename(String url, String title) {
         if (url == null || title == null || title.length() == 0) return false;
         RecordStore rs = null;
+        RecordEnumeration en = null;
+        int updateId = -1;
+        String storedUrl = null;
         try {
             rs = RecordStore.openRecordStore(STORE, false);
-            RecordEnumeration en = rs.enumerateRecords(null, null, false);
-            try {
-                while (en.hasNextElement()) {
-                    int id = en.nextRecordId();
-                    DataInputStream in = new DataInputStream(
-                        new ByteArrayInputStream(rs.getRecord(id)));
-                    in.readUTF();
-                    String storedUrl = in.readUTF();
-                    if (url.equals(storedUrl)) {
-                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                        DataOutputStream out = new DataOutputStream(bytes);
-                        out.writeUTF(title);
-                        out.writeUTF(storedUrl);
-                        out.flush();
-                        byte[] data = bytes.toByteArray();
-                        rs.setRecord(id, data, 0, data.length);
-                        return true;
-                    }
+            en = rs.enumerateRecords(null, null, false);
+            while (en.hasNextElement() && updateId < 0) {
+                int id = en.nextRecordId();
+                DataInputStream in = new DataInputStream(
+                    new ByteArrayInputStream(rs.getRecord(id)));
+                in.readUTF();
+                String candidateUrl = in.readUTF();
+                in.close();
+                if (url.equals(candidateUrl)) {
+                    updateId = id;
+                    storedUrl = candidateUrl;
                 }
-            } finally { en.destroy(); }
-        } catch (Exception e) { return false; }
-        finally { try { if (rs != null) rs.closeRecordStore(); } catch (Exception ignored) {} }
+            }
+            en.destroy();
+            en = null;
+            if (updateId > 0) {
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                DataOutputStream out = new DataOutputStream(bytes);
+                out.writeUTF(title);
+                out.writeUTF(storedUrl);
+                out.flush();
+                byte[] data = bytes.toByteArray();
+                rs.setRecord(updateId, data, 0, data.length);
+                rs.closeRecordStore();
+                rs = null;
+                return true;
+            }
+        } catch (Exception e) {
+            if (en != null) {
+                try { en.destroy(); } catch (Exception ignored) {}
+            }
+            if (rs != null) {
+                try { rs.closeRecordStore(); } catch (Exception ignored) {}
+            }
+            return false;
+        }
+        if (rs != null) {
+            try { rs.closeRecordStore(); } catch (Exception ignored) {}
+        }
         return false;
     }
 
