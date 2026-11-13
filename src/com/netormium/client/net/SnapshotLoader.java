@@ -7,20 +7,33 @@ import javax.microedition.io.HttpConnection;
 
 /** Downloads a PNG viewport snapshot; PNG decoding is mandatory in MIDP 2.0. */
 public final class SnapshotLoader {
-    private String baseUrl = "http://127.0.0.1:8787"; 
+    private String baseUrl = ""; 
 
     public void configureBaseUrl(String value) {
         if (value == null) return;
         String candidate = value.trim();
         while (candidate.endsWith("/")) candidate = candidate.substring(0, candidate.length() - 1);
-        if (candidate.startsWith("http://") || candidate.startsWith("https://")) baseUrl = candidate;
+        if (isValidBaseUrl(candidate)) baseUrl = candidate;
     }
     private static final int MAX_IMAGE_BYTES = 180000;
+
+    private boolean isValidBaseUrl(String value) {
+        if (value == null || value.length() == 0 || value.indexOf(' ') >= 0) return false;
+        String lower = value.toLowerCase();
+        if (!lower.startsWith("http://") && !lower.startsWith("https://")) return false;
+        int schemeEnd = value.indexOf("://") + 3;
+        if (schemeEnd >= value.length()) return false;
+        String host = value.substring(schemeEnd);
+        int slash = host.indexOf('/');
+        if (slash >= 0) host = host.substring(0, slash);
+        return host.length() > 0 && host.indexOf('@') < 0;
+    }
 
     public byte[] load(String targetUrl, int width, int height, int scrollY) {
         HttpConnection connection = null;
         InputStream input = null;
         try {
+            if (baseUrl.length() == 0) return null;
             String request = baseUrl + "/v1/snapshot?url=" + encode(targetUrl) +
                 "&w=" + width + "&h=" + height + "&y=" + scrollY;
             connection = (HttpConnection) Connector.open(request, Connector.READ, true);
