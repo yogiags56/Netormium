@@ -41,7 +41,7 @@ jobs:
           mkdir -p toolchain
           curl --fail --location --retry 3 --output toolchain/ecj-3.7.2.jar https://repo.maven.apache.org/maven2/org/eclipse/jdt/core/compiler/ecj/3.7.2/ecj-3.7.2.jar
           jar tf toolchain/ecj-3.7.2.jar | grep -E 'org/eclipse/jdt/internal/compiler/batch/Main.class'
-          java -jar toolchain/ecj-3.7.2.jar -help > toolchain/ecj-help.txt 2>&1 || true
+          java -cp toolchain/ecj-3.7.2.jar org.eclipse.jdt.internal.compiler.batch.Main -help > toolchain/ecj-help.txt 2>&1 || true
 
       - name: Compile all MIDlet sources
         shell: bash
