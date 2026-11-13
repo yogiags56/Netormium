@@ -92,6 +92,19 @@ const checks = [
     canvas.includes('chooser.addCommand(deleteHistoryEntryCommand)')],
   ['history removal keeps the current index within valid bounds',
     read('src/com/netormium/client/util/BrowserHistory.java').includes('else if (position == index && index >= size) index = size - 1;')],
+  ['gateway endpoint override is persisted and validated independently of JAD defaults',
+    read('src/com/netormium/client/util/GatewaySettingsStore.java').includes('public boolean save(String value)') &&
+    read('src/com/netormium/client/util/GatewaySettingsStore.java').includes('value.indexOf(\'@\') < 0') &&
+    canvas.includes('gatewaySettings.save(value)') &&
+    canvas.includes('gatewaySettings.load()') &&
+    canvas.includes('gatewaySettings.clear()')],
+  ['gateway endpoint changes are applied to all browser transports',
+    canvas.includes('private void configureGateway(String value)') &&
+    canvas.includes('interactive.configureBaseUrl(value)') &&
+    canvas.includes('snapshotLoader.configureBaseUrl(value)') &&
+    canvas.includes('loader.configureBaseUrl(value)') &&
+    canvas.includes('showGatewaySettings()') &&
+    canvas.includes('chooser.append("Gateway address", null)')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&
