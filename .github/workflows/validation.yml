@@ -18,6 +18,9 @@ jobs:
           java-version: '21'
       - name: Install Ant
         run: sudo apt-get update && sudo apt-get install -y ant
+      - name: Install Gateway dependencies
+        working-directory: gateway
+        run: npm install --no-audit --no-fund
       - name: Prepare diagnostic directory
         run: mkdir -p validation-report
       - name: Run gateway unit tests
