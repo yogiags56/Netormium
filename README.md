@@ -35,8 +35,25 @@ HOST=0.0.0.0 PORT=8787 npm start
 ```
 
 Set the JAD property `Netormium-Gateway-URL` to the gateway address reachable
-from the handset. Do not use `127.0.0.1` on a phone unless the gateway runs on
-that same device.
+from the handset. Do not use `127.0.0.1` or the sample private-LAN address on a
+phone unless the gateway is actually running at that address on the same LAN.
+
+**Important: the repository does not host a live gateway.** Building the JAR/JAD
+alone does not provide internet access. You must deploy the Node.js gateway on
+a reachable server, install Playwright Chromium there, allow inbound TCP on the
+chosen port, and configure the exact public/LAN URL in the JAD or Settings.
+For a phone on mobile data, a private address such as `192.168.x.x` will not
+work; use a public HTTPS endpoint or a properly secured reachable server.
+
+The gateway binds to `0.0.0.0` by default so a phone on the same network can
+reach it. This is a network-listening default, **not** a recommendation to expose
+the prototype openly. Before any public exposure, add TLS, authentication,
+per-user limits, process isolation and outbound network controls as described
+in [Gateway security](docs/GATEWAY-SECURITY.md).
+
+Quick connection check from the phone's browser:
+`http(s)://YOUR_GATEWAY_HOST:8787/health`
+A working service returns `Netormium Gateway 1.0.0-rc21 OK`.
 
 ## Source validation
 
