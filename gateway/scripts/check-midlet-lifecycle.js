@@ -18,6 +18,9 @@ function collectJava(directory) {
 }
 collectJava('src');
 const javaSource = javaFiles.join('\n');
+const workerStart = canvas.indexOf('Thread worker = new Thread');
+const workerEnd = canvas.indexOf('worker.start();', workerStart);
+const loadWorker = workerStart >= 0 && workerEnd > workerStart ? canvas.substring(workerStart, workerEnd) : '';
 
 const checks = [
   ['MIDP UI callbacks use Display.callSerially', canvas.includes('Display.getDisplay(midlet).callSerially')],
@@ -36,7 +39,14 @@ const checks = [
     canvas.includes('final com.netormium.client.net.InteractiveGateway.Page fresh = interactive.inspect')],
   ['Java ME sources avoid post-Java-1.3 syntax',
     !javaSource.includes('StringBuilder') && !javaSource.includes('->') &&
-    !javaSource.includes('<>') && !javaSource.includes('try (')]
+    !javaSource.includes('<>') && !javaSource.includes('try (')],
+  ['interactive session mutations are serialized',
+    canvas.includes('private boolean interactionBusy = false;') &&
+    (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&
+    (canvas.match(/interactionBusy = false;/g) || []).length >= 5],
+  ['navigation worker uses viewport captured on UI thread',
+    canvas.includes('final int viewportWidth =') && canvas.includes('final int viewportHeight =') &&
+    loadWorker.length > 0 && !loadWorker.includes('getWidth()') && !loadWorker.includes('getHeight()')]
 ];
 
 let failed = false;
