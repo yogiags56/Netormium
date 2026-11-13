@@ -20,7 +20,7 @@ const URLS = [
 ];
 const URL = URLS[0];
 const SHA512 = '080bb403adb3b88b5b5f382388922425de5274f7729f0a94702f0e2a516c7d13c6740faab1cb20786b1dda0c5da933aa9b842f7c64867414ff75fa668ea06b09';
-const MAIN_CLASS = 'org.eclipse.jdt.compiler.batch.BatchCompiler';
+const MAIN_CLASS = 'org.eclipse.jdt.internal.compiler.batch.Main';
 const MAX_BYTES = 12 * 1024 * 1024;
 
 function sha512(file) {
