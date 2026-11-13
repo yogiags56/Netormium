@@ -63,7 +63,9 @@ Allowed key values are `Enter`, `Tab`, `Backspace`, `Escape`, `ArrowUp`,
   oldest session.
 - Open URL length: 4,096 characters.
 - Text insertion length: 1,024 characters.
-- Metadata and PNG response sizes are bounded by the MIDlet transport.
+- Metadata strings are bounded before percent-encoding: URL 1,024 characters, title 100 characters, visible text 6,000 characters, 24 interactive elements, labels 72 characters, hrefs 256 characters, and input types 24 characters.
+- Element coordinates are normalized to the configured viewport range; invalid numeric values are replaced with safe defaults.
+- The MIDlet rejects metadata responses larger than 60,000 bytes and PNG snapshots larger than 180,000 bytes.
 - PNG viewport dimensions are bounded by the Gateway viewport policy.
 - Snapshot cache lifetime: 5 seconds; global cache budget: 8 MiB; up to two
   snapshots per session.
