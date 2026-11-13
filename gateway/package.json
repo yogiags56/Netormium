@@ -1,6 +1,6 @@
 {
   "name": "netormium-gateway",
-  "version": "1.0.0-rc19",
+  "version": "1.0.0-rc20",
   "private": true,
   "description": "Data-saving Chromium session gateway for Netormium J2ME browser",
   "main": "server.js",
