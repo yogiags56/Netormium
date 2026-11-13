@@ -60,7 +60,7 @@ public final class GatewayPageLoader {
             String requestUrl = baseUrl + "/v1/page?url=" + encode(targetUrl);
             connection = (HttpConnection) Connector.open(requestUrl, Connector.READ, true);
             connection.setRequestMethod(HttpConnection.GET);
-            connection.setRequestProperty("User-Agent", "Netormium/1.0-rc21 (Java ME)");
+            connection.setRequestProperty("User-Agent", "Netormium/1.0.0-rc21 (Java ME)");
             connection.setRequestProperty("Accept", "text/plain");
             connection.setRequestProperty("Accept-Encoding", "identity");
 
