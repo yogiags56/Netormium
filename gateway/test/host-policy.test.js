@@ -22,7 +22,7 @@ test('allows representative global IPv6 and blocks local/special ranges', () => 
   assert.equal(isPublicIp('2606:4700:4700::1111'), true);
   for (const ip of [
     '::', '::1', 'fc00::1', 'fd00::1', 'fe80::1',
-    'ff02::1', '2001:db8::1', '2001:2::1', '2002::1'
+    'ff02::1', '2001:db8::1', '2001:2::1', '2001:20::1', '2002::1'
   ]) assert.equal(isPublicIp(ip), false, ip);
 });
 
