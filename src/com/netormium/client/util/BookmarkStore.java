@@ -49,6 +49,59 @@ public final class BookmarkStore {
         }
     }
 
+    public boolean delete(String url) {
+        if (url == null) return false;
+        RecordStore rs = null;
+        try {
+            rs = RecordStore.openRecordStore(STORE, false);
+            RecordEnumeration en = rs.enumerateRecords(null, null, false);
+            try {
+                while (en.hasNextElement()) {
+                    int id = en.nextRecordId();
+                    byte[] data = rs.getRecord(id);
+                    DataInputStream in = new DataInputStream(new ByteArrayInputStream(data));
+                    in.readUTF();
+                    if (url.equals(in.readUTF())) {
+                        rs.deleteRecord(id);
+                        return true;
+                    }
+                }
+            } finally { en.destroy(); }
+        } catch (Exception e) { return false; }
+        finally { try { if (rs != null) rs.closeRecordStore(); } catch (Exception ignored) {} }
+        return false;
+    }
+
+    public boolean rename(String url, String title) {
+        if (url == null || title == null || title.length() == 0) return false;
+        RecordStore rs = null;
+        try {
+            rs = RecordStore.openRecordStore(STORE, false);
+            RecordEnumeration en = rs.enumerateRecords(null, null, false);
+            try {
+                while (en.hasNextElement()) {
+                    int id = en.nextRecordId();
+                    byte[] old = rs.getRecord(id);
+                    DataInputStream in = new DataInputStream(new ByteArrayInputStream(old));
+                    in.readUTF();
+                    String storedUrl = in.readUTF();
+                    if (url.equals(storedUrl)) {
+                        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                        DataOutputStream out = new DataOutputStream(bytes);
+                        out.writeUTF(title);
+                        out.writeUTF(storedUrl);
+                        out.flush();
+                        byte[] data = bytes.toByteArray();
+                        rs.setRecord(id, data, 0, data.length);
+                        return true;
+                    }
+                }
+            } finally { en.destroy(); }
+        } catch (Exception e) { return false; }
+        finally { try { if (rs != null) rs.closeRecordStore(); } catch (Exception ignored) {} }
+        return false;
+    }
+
     public Bookmark[] all() {
         java.util.Vector v = new java.util.Vector();
         RecordStore rs = null;
