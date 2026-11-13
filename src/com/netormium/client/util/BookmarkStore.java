@@ -52,23 +52,34 @@ public final class BookmarkStore {
     public boolean delete(String url) {
         if (url == null) return false;
         RecordStore rs = null;
+        int deleteId = -1;
         try {
             rs = RecordStore.openRecordStore(STORE, false);
             RecordEnumeration en = rs.enumerateRecords(null, null, false);
             try {
-                while (en.hasNextElement()) {
+                while (en.hasNextElement() && deleteId < 0) {
                     int id = en.nextRecordId();
                     byte[] data = rs.getRecord(id);
                     DataInputStream in = new DataInputStream(new ByteArrayInputStream(data));
                     in.readUTF();
-                    if (url.equals(in.readUTF())) {
-                        rs.deleteRecord(id);
-                        return true;
-                    }
+                    String storedUrl = in.readUTF();
+                    if (url.equals(storedUrl)) deleteId = id;
+                    in.close();
                 }
-            } finally { en.destroy(); }
-        } catch (Exception e) { return false; }
-        finally { try { if (rs != null) rs.closeRecordStore(); } catch (Exception ignored) {} }
+            } finally {
+                en.destroy();
+            }
+            if (deleteId > 0) {
+                rs.deleteRecord(deleteId);
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
+        } finally {
+            try {
+                if (rs != null) rs.closeRecordStore();
+            } catch (Exception ignored) {}
+        }
         return false;
     }
 
