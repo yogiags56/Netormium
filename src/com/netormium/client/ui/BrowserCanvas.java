@@ -1329,7 +1329,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                 int selected = mainMenuSelection;
                 mainMenuOpen = false;
                 handleMainMenuSelection(selected);
-            } else if (keyCode == KEY_NUM0 || keyCode == KEY_NUM_STAR) {
+            } else if (keyCode == KEY_NUM0 || keyCode == '*') {
                 closeMainMenu();
             }
             return;
