@@ -412,17 +412,18 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         scrollY = 0;
         loading = true;
         final int token = ++requestToken;
+        final int viewportWidth = Math.max(128, Math.min(640, getWidth()));
+        final ScreenMetrics metrics = new ScreenMetrics(getWidth(), getHeight());
+        final AdaptiveLayout layout = new AdaptiveLayout(metrics);
+        final int viewportHeight = Math.max(128, Math.min(960, getHeight() -
+            layout.getAddressBarHeight() - layout.getToolbarHeight() - 6));
+        final boolean useDataSaver = dataSaverEnabled;
         repaint();
 
         Thread worker = new Thread(new Runnable() {
             public void run() {
-                ScreenMetrics metrics = new ScreenMetrics(getWidth(), getHeight());
-                AdaptiveLayout layout = new AdaptiveLayout(metrics);
-                int viewportHeight = Math.max(128, getHeight() -
-                    layout.getAddressBarHeight() - layout.getToolbarHeight() - 6);
                 final com.netormium.client.net.InteractiveGateway.Page result =
-                    interactive.open(url, Math.max(128, Math.min(640, getWidth())),
-                        Math.max(128, Math.min(960, viewportHeight)), dataSaverEnabled);
+                    interactive.open(url, viewportWidth, viewportHeight, useDataSaver);
                 if (token != requestToken) {
                     if (result.sessionId.length() > 0) interactive.close(result.sessionId);
                     return;
@@ -444,7 +445,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                             persistState();
                             pageText = result.text;
                             interactiveElements = result.elements;
-                            status = dataSaverEnabled ? "Interactive session · Data Saver" : "Interactive session";
+                            status = useDataSaver ? "Interactive session · Data Saver" : "Interactive session";
                             refreshSessionSnapshot(token, scrollY);
                         }
                         scrollY = 0;
