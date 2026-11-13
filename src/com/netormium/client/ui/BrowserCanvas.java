@@ -32,6 +32,10 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private final TabManager tabs = new TabManager();
     private final BookmarkStore bookmarks = new BookmarkStore();
     private String[] bookmarkUrls = new String[0];
+    private TextBox bookmarkRenameBox;
+    private int selectedBookmark = -1;
+    private final Command renameBookmarkCommand = new Command("Rename", Command.SCREEN, 1);
+    private final Command deleteBookmarkCommand = new Command("Delete", Command.SCREEN, 2);
     private List chooser;
     private final GatewayPageLoader loader = new GatewayPageLoader();
     private final com.netormium.client.net.InteractiveGateway interactive =
@@ -105,12 +109,44 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             } else Display.getDisplay(midlet).setCurrent(this);
             return;
         }
+        if (displayable == bookmarkRenameBox) {
+            if (command.getCommandType() == Command.OK && selectedBookmark >= 0 &&
+                selectedBookmark < bookmarkUrls.length) {
+                String title = bookmarkRenameBox.getString();
+                status = bookmarks.rename(bookmarkUrls[selectedBookmark], title)
+                    ? "Bookmark renamed" : "Rename failed";
+                showBookmarks();
+            } else Display.getDisplay(midlet).setCurrent(this);
+            return;
+        }
         if (displayable == inputBox) {
             if (command.getCommandType() == Command.OK) sendTextToPage(inputBox.getString());
             else Display.getDisplay(midlet).setCurrent(this);
             return;
         }
         if (displayable == chooser) {
+            if (command == renameBookmarkCommand && "Bookmarks".equals(chooser.getTitle())) {
+                selectedBookmark = chooser.getSelectedIndex();
+                if (selectedBookmark >= 0 && selectedBookmark < bookmarkUrls.length) {
+                    BookmarkStore.Bookmark[] items = bookmarks.all();
+                    String title = selectedBookmark < items.length ? items[selectedBookmark].title : "";
+                    bookmarkRenameBox = new TextBox("Rename bookmark", title, 80, TextField.ANY);
+                    bookmarkRenameBox.addCommand(new Command("Save", Command.OK, 1));
+                    bookmarkRenameBox.addCommand(new Command("Cancel", Command.CANCEL, 2));
+                    bookmarkRenameBox.setCommandListener(this);
+                    Display.getDisplay(midlet).setCurrent(bookmarkRenameBox);
+                }
+                return;
+            }
+            if (command == deleteBookmarkCommand && "Bookmarks".equals(chooser.getTitle())) {
+                int selected = chooser.getSelectedIndex();
+                if (selected >= 0 && selected < bookmarkUrls.length) {
+                    status = bookmarks.delete(bookmarkUrls[selected])
+                        ? "Bookmark deleted" : "Delete failed";
+                    showBookmarks();
+                }
+                return;
+            }
             if (command == clearHistoryCommand && "History".equals(chooser.getTitle())) {
                 history.clear();
                 historyStore.save(history);
@@ -348,7 +384,9 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             chooser.append(items[i].title, null);
         }
         if (items.length == 0) chooser.append("No bookmarks saved", null);
-        chooser.addCommand(new Command("Back", Command.BACK, 1));
+        chooser.addCommand(renameBookmarkCommand);
+        chooser.addCommand(deleteBookmarkCommand);
+        chooser.addCommand(new Command("Back", Command.BACK, 3));
         chooser.setCommandListener(this);
         Display.getDisplay(midlet).setCurrent(chooser);
     }
