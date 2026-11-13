@@ -81,9 +81,13 @@ jobs:
           EOF
           "$PROGUARD_DIR/proguard.sh" @toolchain/netormium.pro
           test -s dist/Netormium.jar
-          jar --update --file dist/Netormium.jar --manifest toolchain/Netormium-MANIFEST.MF
+          mkdir -p build/preverified
+          (cd build/preverified && jar xf ../../dist/Netormium.jar)
+          rm -rf build/preverified/META-INF
+          jar --create --file dist/Netormium.jar --manifest toolchain/Netormium-MANIFEST.MF -C build/preverified .
           jar xf dist/Netormium.jar META-INF/MANIFEST.MF
           grep -Fx 'MIDlet-Name: Netormium' META-INF/MANIFEST.MF
+          grep -Fx 'MicroEdition-Profile: MIDP-2.0' META-INF/MANIFEST.MF
           rm -rf META-INF
           jar tf dist/Netormium.jar | grep -Fx 'com/netormium/client/NetormiumMIDlet.class'
           if jar tf dist/Netormium.jar | grep -q '^javax/microedition/'; then
