@@ -979,7 +979,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
             g.setColor(ThemeManager.MUTED);
             g.drawString("No Speed Dial entries yet.", 7, sectionY + 5,
                 Graphics.LEFT | Graphics.TOP);
-            g.drawString("Open a site and choose Add Bookmark.", 7,
+            g.drawString("Open a site and choose Add to Speed Dial.", 7,
                 sectionY + body.getHeight() + 9, Graphics.LEFT | Graphics.TOP);
             return;
         }
@@ -1008,7 +1008,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         }
         if (items.length > visible) {
             g.setColor(ThemeManager.MUTED);
-            g.drawString("Add Bookmark to grow your Speed Dial.",
+            g.drawString("Manage all entries from Menu > Speed Dial.",
                 5, Math.min(bottom - body.getHeight(), sectionY +
                 3 * (tileHeight + gap)), Graphics.LEFT | Graphics.TOP);
         }
