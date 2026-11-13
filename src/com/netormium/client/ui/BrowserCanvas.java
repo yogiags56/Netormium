@@ -423,7 +423,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private void showAbout() {
         final Display display = Display.getDisplay(midlet);
         final Alert alert = new Alert("About Netormium",
-            "Netormium\nBrowser version: 1.0.0-rc21\nChromium version: Checking...\n\nChromium-assisted J2ME browser.",
+            "Netormium\nBrowser version: 1.0.0-rc21\nGateway version: Checking...\nChromium version: Checking...\nConnection: Checking...\n\nChromium-assisted J2ME browser.",
             null, AlertType.INFO);
         alert.setTimeout(Alert.FOREVER);
         display.setCurrent(alert, this);
