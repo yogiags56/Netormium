@@ -174,7 +174,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         }
     }
 
-    private void runOnUiThread(final Runnable action) {\n        Display.getDisplay(midlet).callSerially(action);\n    }\n\n    private void postUi(final int token, final String expectedSessionId, final Runnable action) {
+    private void postUi(final int token, final String expectedSessionId, final Runnable action) {
         Display.getDisplay(midlet).callSerially(new Runnable() {
             public void run() {
                 if (token != requestToken) return;
