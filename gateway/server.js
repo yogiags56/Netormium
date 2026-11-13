@@ -321,10 +321,10 @@ const server = http.createServer(async (req, res) => {
   }
   if (req.method === 'GET' && requestUrl.pathname === '/v1/info') {
     return send(res, 200,
-      'NTMINFO/1\\n' +
+      'NTMINFO/1\n' +
       'GATEWAY\t1.0.0-rc21\n' +
       'CHROMIUM\t' + browser.version() + '\n' +
-      'END\\n');
+      'END\n');
   }
   if (req.method === 'GET' && requestUrl.pathname === '/v1/session/cancel') {
     const requestId = requestUrl.searchParams.get('rid') || '';
