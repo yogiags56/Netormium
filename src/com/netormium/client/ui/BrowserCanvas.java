@@ -174,7 +174,7 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         }
     }
 
-    private void saveCurrentTab() {
+    private void runOnUiThread(final Runnable action) {\n        Display.getDisplay(midlet).callSerially(action);\n    }\n\n    private void saveCurrentTab() {
         tabs.updateCurrent(currentUrl, pageTitle, scrollY);
         tabs.setCurrentSessionId(sessionId);
         stateStore.save(tabs);
@@ -192,29 +192,11 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         currentUrl = tab.url == null ? "" : tab.url;
         pageTitle = tab.title == null ? "Netormium" : tab.title;
         scrollY = tab.scrollY;
-        if (tab.sessionId != null && tab.sessionId.length() > 0) {
-            sessionId = tab.sessionId;
-            final String id = sessionId;
-            final int token = requestToken;
-            new Thread(new Runnable() {
-                public void run() {
-                    com.netormium.client.net.InteractiveGateway.Page page = interactive.inspect(id);
-                    if (token != requestToken || !id.equals(sessionId)) return;
-                    if (page.error.length() > 0) {
-                        if (!recoverExpiredSession(id, token, page.error)) {
-                            status = "Session check failed - retry when online";
-                            repaint();
-                        }
-                    } else {
-                        pageTitle = page.title;
-                        pageText = page.text;
-                        interactiveElements = page.elements;
-                        refreshSessionSnapshot(token, scrollY);
-                        repaint();
-                    }
-                }
-            }).start();
-        } else if (currentUrl.length() > 0) loadUrl(currentUrl, false);
+        // Gateway sessions are in-memory and may disappear after server restart or TTL expiry.
+        // Restore the URL and create a fresh session instead of trusting a persisted session ID.
+        sessionId = "";
+        tabs.setCurrentSessionId("");
+        if (currentUrl.length() > 0) loadUrl(currentUrl, false);
         else showHome();
     }
 
