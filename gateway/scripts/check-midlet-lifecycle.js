@@ -165,11 +165,11 @@ const checks = [
     canvas.includes('alert.setString(')],
   ['gateway exposes the actual running Playwright Chromium version',
     read('gateway/server.js').includes("requestUrl.pathname === '/v1/info'") &&
-    read('gateway/server.js').includes("'CHROMIUM\\\\t' + browser.version()")],
+    read('gateway/server.js').includes("'CHROMIUM\\t' + browser.version()")],
   ['MIDlet runtime info parser reads gateway and Chromium version fields',
     read('src/com/netormium/client/net/InteractiveGateway.java').includes('public String getRuntimeInfo()') &&
-    read('src/com/netormium/client/net/InteractiveGateway.java').includes('line.startsWith("GATEWAY\\\\t")') &&
-    read('src/com/netormium/client/net/InteractiveGateway.java').includes('line.startsWith("CHROMIUM\\\\t")')]
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('line.startsWith("GATEWAY\\t")') &&
+    read('src/com/netormium/client/net/InteractiveGateway.java').includes('line.startsWith("CHROMIUM\\t")')]
 ];
 
 let failed = false;
