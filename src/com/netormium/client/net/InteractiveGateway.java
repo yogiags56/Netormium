@@ -79,20 +79,20 @@ public final class InteractiveGateway {
     /** Reads the exact browser engine version running in the remote gateway. */
     public String getRuntimeInfo() {
         byte[] data = requestBytes("/v1/info", 1024);
-        if (data == null) return "Gateway: Unavailable\\nChromium: Unavailable";
+        if (data == null) return "Gateway: Unavailable\nChromium: Unavailable";
         String response = new String(data);
         String gatewayVersion = "Unknown";
         String chromiumVersion = "Unknown";
         int start = 0;
         while (start < response.length()) {
-            int end = response.indexOf('\\n', start);
+            int end = response.indexOf('\n', start);
             if (end < 0) end = response.length();
             String line = response.substring(start, end).trim();
-            if (line.startsWith("GATEWAY\\t")) gatewayVersion = line.substring(8);
-            else if (line.startsWith("CHROMIUM\\t")) chromiumVersion = line.substring(9);
+            if (line.startsWith("GATEWAY\t")) gatewayVersion = line.substring(8);
+            else if (line.startsWith("CHROMIUM\t")) chromiumVersion = line.substring(9);
             start = end + 1;
         }
-        return "Gateway: " + gatewayVersion + "\\nChromium: " + chromiumVersion;
+        return "Gateway: " + gatewayVersion + "\nChromium: " + chromiumVersion;
     }
 
     public Page open(String url, int width, int height) {
