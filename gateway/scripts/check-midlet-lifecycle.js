@@ -41,6 +41,11 @@ const checks = [
     !javaSource.includes('StringBuilder') && !javaSource.includes('->') &&
     !javaSource.includes('<>') && !javaSource.includes('try (')],
   ['zero key resets and persists the remote Chromium viewport', canvas.includes('} else if (keyCode == KEY_NUM0) {\n            scrollY = 0;\n            tabs.setCurrentScroll(scrollY);\n            stateStore.save(tabs);\n            if (sessionId.length() > 0) refreshSessionSnapshot(requestToken, scrollY);')],
+  ['bookmark duplicate detection completes enumeration cleanup before returning',
+    read('src/com/netormium/client/util/BookmarkStore.java').includes('exists = url.equals(in.readUTF());') &&
+    read('src/com/netormium/client/util/BookmarkStore.java').includes('if (exists) return true;') &&
+    read('src/com/netormium/client/util/BookmarkStore.java').indexOf('if (exists) return true;') >
+      read('src/com/netormium/client/util/BookmarkStore.java').indexOf('en.destroy();')],
   ['interactive session mutations are serialized',
     canvas.includes('private boolean interactionBusy = false;') &&
     (canvas.match(/interactionBusy = true;/g) || []).length === 3 &&

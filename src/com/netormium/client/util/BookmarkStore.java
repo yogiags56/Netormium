@@ -20,14 +20,18 @@ public final class BookmarkStore {
         try {
             rs = RecordStore.openRecordStore(STORE, true);
             RecordEnumeration en = rs.enumerateRecords(null, null, false);
+            boolean exists = false;
             try {
-                while (en.hasNextElement()) {
+                while (!exists && en.hasNextElement()) {
                     byte[] old = rs.getRecord(en.nextRecordId());
                     DataInputStream in = new DataInputStream(new ByteArrayInputStream(old));
                     in.readUTF();
-                    if (url.equals(in.readUTF())) return true;
+                    exists = url.equals(in.readUTF());
                 }
-            } finally { en.destroy(); }
+            } finally {
+                en.destroy();
+            }
+            if (exists) return true;
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             DataOutputStream out = new DataOutputStream(bytes);
             out.writeUTF(title == null ? url : title);
@@ -36,9 +40,15 @@ public final class BookmarkStore {
             byte[] data = bytes.toByteArray();
             rs.addRecord(data, 0, data.length);
             return true;
-        } catch (Exception e) { return false; }
-        finally { try { if (rs != null) rs.closeRecordStore(); } catch (Exception ignored) {} }
+        } catch (Exception e) {
+            return false;
+        } finally {
+            try {
+                if (rs != null) rs.closeRecordStore();
+            } catch (Exception ignored) {}
+        }
     }
+
     public Bookmark[] all() {
         java.util.Vector v = new java.util.Vector();
         RecordStore rs = null;

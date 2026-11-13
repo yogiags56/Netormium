@@ -1,4 +1,5 @@
 ## 1.0.0-rc21 — MIDlet lifecycle and UI-thread hardening
+- Refactor bookmark duplicate detection to avoid an ECJ-generated exception-handler stack merge that ProGuard 7.10.0 cannot preverify.
 - Fix keypad `0` so the remote Chromium viewport, local screenshot, and persisted tab scroll position all return to the top.
 - Bound NTM/2 URL, title, text, and interactive element metadata before wire encoding; normalize invalid element kinds and coordinates.
 - Correct the browser inspiration reference in README from Opera Mini 4.3 to Opera Mini 4.5.
