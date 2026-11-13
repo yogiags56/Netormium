@@ -1,0 +1,86 @@
+name: Import Netormium RC20 baseline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/import-rc20.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: netormium-rc20-import
+  cancel-in-progress: false
+
+jobs:
+  extract-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Verify and safely extract RC20 archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE="release/Netormium_1.0_RC20_Browser_Only_Development.zip"
+          test -f "$ARCHIVE"
+          echo "6d99e5b18cda308737fb05e399229af0ddacec9564e728f71dbc7f5056ef0da6  $ARCHIVE" | sha256sum --check
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          from zipfile import ZipFile
+          import shutil
+
+          archive = Path("release/Netormium_1.0_RC20_Browser_Only_Development.zip")
+          target = Path("/tmp/netormium-rc20")
+          expected_root = "Netormium_1.0_RC20/"
+          with ZipFile(archive) as z:
+              entries = [i for i in z.infolist() if not i.is_dir()]
+              if len(entries) != 68:
+                  raise SystemExit(f"Expected 68 files, found {len(entries)}")
+              for item in entries:
+                  p = PurePosixPath(item.filename)
+                  if p.is_absolute() or ".." in p.parts or not item.filename.startswith(expected_root):
+                      raise SystemExit(f"Unsafe or unexpected archive path: {item.filename}")
+              z.extractall(target)
+          source = target / "Netormium_1.0_RC20"
+          if not source.is_dir():
+              raise SystemExit("Expected RC20 source directory is missing")
+          shutil.copytree(source, Path.cwd(), dirs_exist_ok=True)
+          print(f"Extracted and overlaid {len(entries)} verified files")
+          PY
+          test ! -e android/termux
+          test -f gateway/server.js
+          test -f src/com/netormium/client/NetormiumMIDlet.java
+
+      - name: Validate gateway source
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run source tests and release checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd gateway
+          npm test
+          npm run check:release
+
+      - name: Commit extracted RC20 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No source changes to commit."
+            exit 0
+          fi
+          git commit -m "Import Netormium 1.0 RC20 source baseline"
+          git push origin HEAD:main
