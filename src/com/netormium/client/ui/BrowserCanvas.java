@@ -37,6 +37,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
     private int selectedSpeedDial = -1;
     private final Command renameSpeedDialCommand = new Command("Rename", Command.SCREEN, 1);
     private final Command deleteSpeedDialCommand = new Command("Delete", Command.SCREEN, 2);
+    private final Command moveSpeedDialUpCommand = new Command("Move Up", Command.SCREEN, 3);
+    private final Command moveSpeedDialDownCommand = new Command("Move Down", Command.SCREEN, 4);
     private String[] bookmarkUrls = new String[0];
     private TextBox bookmarkRenameBox;
     private TextBox speedDialRenameBox;
@@ -158,6 +160,17 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
                 if (selected >= 0 && selected < speedDialUrls.length) {
                     status = speedDial.delete(speedDialUrls[selected])
                         ? "Speed Dial entry deleted" : "Delete failed";
+                    showSpeedDial();
+                }
+                return;
+            }
+            if ((command == moveSpeedDialUpCommand || command == moveSpeedDialDownCommand) &&
+                "Speed Dial".equals(chooser.getTitle())) {
+                int selected = chooser.getSelectedIndex();
+                if (selected >= 0 && selected < speedDialUrls.length) {
+                    int direction = command == moveSpeedDialUpCommand ? -1 : 1;
+                    status = speedDial.move(speedDialUrls[selected], direction)
+                        ? "Speed Dial order updated" : "Already at list boundary";
                     showSpeedDial();
                 }
                 return;
@@ -430,6 +443,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         if (entries.length == 0) chooser.append("No Speed Dial entries", null);
         chooser.addCommand(renameSpeedDialCommand);
         chooser.addCommand(deleteSpeedDialCommand);
+        chooser.addCommand(moveSpeedDialUpCommand);
+        chooser.addCommand(moveSpeedDialDownCommand);
         chooser.addCommand(new Command("Back", Command.BACK, 3));
         chooser.setCommandListener(this);
         Display.getDisplay(midlet).setCurrent(chooser);
