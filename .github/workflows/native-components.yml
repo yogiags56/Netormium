@@ -1,0 +1,40 @@
+name: Netormium native component build
+on:
+  push:
+    paths:
+      - "native/**"
+      - ".github/workflows/native-components.yml"
+  pull_request:
+    paths:
+      - "native/**"
+      - ".github/workflows/native-components.yml"
+  workflow_dispatch:
+
+jobs:
+  brotli-android:
+    name: Brotli decoder / Android NDK / arm64-v8a
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: android-actions/setup-android@v3
+      - name: Install Android NDK
+        run: sdkmanager "ndk;27.2.12479018"
+      - name: Configure Brotli decoder
+        run: |
+          cmake -S native -B build/native-arm64 -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="$ANDROID_HOME/ndk/27.2.12479018/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI=arm64-v8a \
+            -DANDROID_PLATFORM=android-23 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=OFF
+      - name: Build upstream Brotli decoder
+        run: cmake --build build/native-arm64 --target brotlidec
+      - name: Verify static library exists
+        run: |
+          find build/native-arm64 -type f \( -name "libbrotlidec.a" -o -name "brotlidec.lib" \) -print -quit | grep .
+      - name: Upload native build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: netormium-brotli-android-arm64
+          path: build/native-arm64/**/libbrotlidec.a
+          if-no-files-found: error
