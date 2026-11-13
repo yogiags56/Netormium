@@ -70,12 +70,29 @@ public final class GatewayPageLoader {
                 return page;
             }
 
+            long declaredLength = connection.getLength();
+            if (declaredLength > MAX_RESPONSE_BYTES) {
+                page.error = "Gateway response exceeds 64 KB";
+                return page;
+            }
             input = connection.openInputStream();
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream(
+                declaredLength > 0 ? (int)declaredLength : 4096);
             byte[] buffer = new byte[1024];
             int count;
             int total = 0;
             while ((count = input.read(buffer)) != -1) {
+                if (count == 0) {
+                    int single = input.read();
+                    if (single < 0) break;
+                    total++;
+                    if (total > MAX_RESPONSE_BYTES) {
+                        page.error = "Gateway response exceeds 64 KB";
+                        return page;
+                    }
+                    bytes.write(single);
+                    continue;
+                }
                 total += count;
                 if (total > MAX_RESPONSE_BYTES) {
                     page.error = "Gateway response exceeds 64 KB";
