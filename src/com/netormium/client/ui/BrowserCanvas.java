@@ -1095,7 +1095,17 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         g.setColor(ThemeManager.MUTED);
         g.drawString("Search or enter address", 12, searchY + 5, Graphics.LEFT | Graphics.TOP);
 
-        int sectionY = searchY + searchHeight + 10;
+        int shortcutY = searchY + searchHeight + 6;
+        int shortcutHeight = Math.max(22, body.getHeight() + 8);
+        int shortcutWidth = (width - 15) / 2;
+        g.setColor(ThemeManager.ACCENT);
+        g.drawRoundRect(5, shortcutY, shortcutWidth, shortcutHeight, 6, 6);
+        g.drawRoundRect(10 + shortcutWidth, shortcutY, shortcutWidth, shortcutHeight, 6, 6);
+        g.setColor(ThemeManager.FOREGROUND);
+        g.drawString("Bookmarks", 5 + shortcutWidth / 2, shortcutY + 4, Graphics.HCENTER | Graphics.TOP);
+        g.drawString("History", 10 + shortcutWidth + shortcutWidth / 2, shortcutY + 4, Graphics.HCENTER | Graphics.TOP);
+
+        int sectionY = shortcutY + shortcutHeight + 8;
         g.setColor(ThemeManager.HEADER_FOREGROUND);
         g.drawString("Speed Dial", 5, sectionY, Graphics.LEFT | Graphics.TOP);
         sectionY += body.getHeight() + 5;
@@ -1148,7 +1158,14 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         int searchY = top + 8 + logoSize + title.getHeight() + body.getHeight() + 13;
         int searchHeight = Math.max(25, body.getHeight() + 12);
         if (y >= searchY && y < searchY + searchHeight && x >= 5 && x < getWidth() - 5) return -2;
-        int sectionY = searchY + searchHeight + 10;
+        int shortcutY = searchY + searchHeight + 6;
+        int shortcutHeight = Math.max(22, body.getHeight() + 8);
+        int shortcutWidth = (getWidth() - 15) / 2;
+        if (y >= shortcutY && y < shortcutY + shortcutHeight) {
+            if (x >= 5 && x < 5 + shortcutWidth) return -3;
+            if (x >= 10 + shortcutWidth && x < getWidth() - 5) return -4;
+        }
+        int sectionY = shortcutY + shortcutHeight + 8;
         sectionY += body.getHeight() + 5;
         int columns = getWidth() >= 220 ? 2 : 1;
         int gap = 5;
@@ -1173,6 +1190,8 @@ public final class BrowserCanvas extends Canvas implements CommandListener {
         if (y >= top && y < bottom && currentUrl.length() == 0) {
             int dial = speedDialIndexAt(x, y, top, bottom);
             if (dial == -2) { showAddressBox(); return; }
+            if (dial == -3) { showBookmarks(); return; }
+            if (dial == -4) { showHistory(); return; }
             SpeedDialStore.Entry[] items = speedDial.all();
             if (dial >= 0 && dial < items.length) loadUrl(items[dial].url, true);
         } else if (y >= top && y < bottom && sessionId.length() > 0) {
