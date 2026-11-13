@@ -24,3 +24,20 @@ END
 
 Client must percent-decode UTF-8 fields. Do not assume all lines or records arrive in one network read.
 The gateway is a trusted-server component. Production deployment must add authentication, TLS, rate limiting, DNS/IP validation on every redirect and subrequest, request quotas, and abuse monitoring.
+
+
+## Java ME transport limits
+
+The MIDP client requests response data with a strict byte ceiling and checks both
+the declared HTTP entity length (when supplied by the server) and the actual
+number of bytes received. A missing or unknown Content-Length is not treated as
+zero: the streaming counter remains authoritative. The PNG and interactive
+clients use separate limits.
+
+The MIDP 2.0 `HttpConnection` API does not expose a portable numeric connect,
+read, or overall request timeout setter. `Connector.open(..., true)` asks the
+implementation for timeout-capable connection behavior, but the actual timeout
+policy is vendor/runtime-specific. Therefore a gateway request can still block
+on some handsets or network stacks. The client must not claim a hard timeout
+guarantee until tested against the target devices; a server-side request
+deadline and reverse-proxy timeout are also required.
